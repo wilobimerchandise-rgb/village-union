@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VillageUnion — Transparent Financial Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.0/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Confirm dialog -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-card modal-sm">
+      <h3 id="cmTitle">Confirm</h3>
+      <p id="cmMessage" style="color:var(--muted);margin:1rem 0"></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Cancel</button>
+        <button class="btn btn-danger" id="cmConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ LANDING PAGE ============ -->
+  <section id="landing" class="view active">
+    <header class="nav">
+      <div class="logo">🏘️ <span>VillageUnion</span></div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#villages">Villages</a>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌙</button>
+        <button class="btn btn-primary" onclick="showView('login')">Login</button>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-text">
+        <div class="hero-badge">✨ Trusted by 10 Villages</div>
+        <h1>Transparent Finances for <span class="gradient-text">10 Villages</span>, One Trusted Union.</h1>
+        <p>Securely record annual dues, burial levies, life insurance, party donations and support levies. Every transaction verified, every report downloadable, every edit audited.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary btn-lg" onclick="showView('login')">
+            Member / Admin Login →
+          </button>
+          <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>10</strong><span>Villages</span></div>
+          <div><strong>₦ 2.4M+</strong><span>Collected</span></div>
+          <div><strong>100%</strong><span>Audited</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-head">
+            <div>
+              <div class="hero-card-title">Monthly Report</div>
+              <div class="hero-card-sub">October 2026</div>
+            </div>
+            <div class="pulse-dot"></div>
+          </div>
+          <div class="hero-card-row"><span>Annual Dues</span><b>₦ 1,250,000</b></div>
+          <div class="hero-card-row"><span>Burial Levy</span><b>₦ 320,000</b></div>
+          <div class="hero-card-row"><span>Life Insurance</span><b>₦ 480,000</b></div>
+          <div class="hero-card-row"><span>Party Donations</span><b>₦ 150,000</b></div>
+          <div class="hero-card-row"><span>Support Levy</span><b>₦ 210,000</b></div>
+          <div class="hero-card-foot">Total <b>₦ 2,410,000</b></div>
+        </div>
+        <div class="floating-card fc-1">🔒 Tenant Isolation</div>
+        <div class="floating-card fc-2">📊 Real-time Reports</div>
+      </div>
+    </section>
+
+    <section id="features" class="features section">
+      <div class="section-head">
+        <span class="pill">Features</span>
+        <h2>Built for <span class="gradient-text">accountability</span></h2>
+        <p>Everything you need to manage village finances with complete transparency.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature reveal"><div class="f-icon">🔒</div><h3>Tenant Isolation</h3><p>Each of the 10 villages has its own credentials. No village can see another's data — ever.</p></div>
+        <div class="feature reveal"><div class="f-icon">📤</div><h3>Proof of Payment</h3><p>Members upload receipts; admins verify before records are updated.</p></div>
+        <div class="feature reveal"><div class="f-icon">📊</div><h3>Monthly & Yearly Reports</h3><p>One-click PDF downloads with charts for transparent reporting.</p></div>
+        <div class="feature reveal"><div class="f-icon">🕒</div><h3>Full Audit Trail</h3><p>Every edit is logged with the admin's name and timestamp.</p></div>
+        <div class="feature reveal"><div class="f-icon">💰</div><h3>5 Levy Categories</h3><p>Annual dues, burial, life insurance, party donations, support levy.</p></div>
+        <div class="feature reveal"><div class="f-icon">👥</div><h3>Role-Based Access</h3><p>Members view records; admins manage, verify, and edit.</p></div>
+      </div>
+    </section>
+
+    <section id="how" class="how section">
+      <div class="section-head">
+        <span class="pill">Workflow</span>
+        <h2>How it <span class="gradient-text">works</span></h2>
+        <p>A simple, transparent 4-step process.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><div class="num">1</div><h4>Member uploads proof</h4><p>Submit payment receipt for any levy category.</p></div>
+        <div class="step reveal"><div class="num">2</div><h4>Admin verifies</h4><p>Only verified payments update the member's record.</p></div>
+        <div class="step reveal"><div class="num">3</div><h4>Reports generated</h4><p>Monthly & yearly PDFs ready for download.</p></div>
+        <div class="step reveal"><div class="num">4</div><h4>Audit logged</h4><p>Every action is timestamped and attributed.</p></div>
+      </div>
+    </section>
+
+    <section id="villages" class="villages section">
+      <div class="section-head">
+        <span class="pill">Network</span>
+        <h2>Trusted by <span class="gradient-text">10 Villages</span></h2>
+        <p>Each village operates in complete isolation — unique login, unique data.</p>
+      </div>
+      <div class="village-grid" id="villageGrid">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 VillageUnion Portal. Built for transparency and trust.</p>
+    </footer>
+  </section>
+
+  <!-- ============ LOGIN PAGE ============ -->
+  <section id="login" class="view">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="logo">🏘️ <span>VillageUnion</span></div>
+        <h2>Sign in to your village portal</h2>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="field">
+            <label>Select Village</label>
+            <select id="loginVillage" required>
+              <option value="">Loading villages...</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select id="loginRole" required>
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="loginUser" required autocomplete="username"/>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="loginPass" required autocomplete="current-password"/>
+          </div>
+          <div class="field-error" id="loginError"></div>
+          <button class="btn btn-primary btn-block" type="submit">Login →</button>
+          <button type="button" class="btn btn-ghost btn-block" onclick="showView('landing')">← Back to home</button>
+        </form>
+        <div class="demo-creds">
+          <strong>🔑 Demo credentials:</strong><br/>
+          Village 1 → admin: <code>admin1 / admin123</code> • member: <code>member1_1 / member123</code><br/>
+          Village 2 → admin: <code>admin2 / admin123</code> • member: <code>member2_1 / member123</code><br/>
+          <em>(Pattern continues for villages 1–10)</em>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEMBER DASHBOARD ============ -->
+  <section id="memberDash" class="view">
+    <div class="dash">
+      <aside class="sidebar" id="mSidebar">
+        <div class="sidebar-head">
+          <div class="logo sm">🏘️ <span id="mVillageName">Village</span></div>
+          <button class="sidebar-close" onclick="toggleSidebar('mSidebar')">✕</button>
+        </div>
+        <nav class="side-nav">
+          <a data-tab="m-overview" class="active">📊 Overview</a>
+          <a data-tab="m-transactions">💳 My Transactions</a>
+          <a data-tab="m-submit">📤 Submit Payment</a>
+          <a data-tab="m-reports">📄 Reports</a>
+        </nav>
+        <div class="sidebar-foot">
+          <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+          <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <button class="hamburger small" onclick="toggleSidebar('mSidebar')">☰</button>
+          <h2 id="mWelcome">Welcome</h2>
+          <span class="badge">Member</span>
+        </header>
+
+        <div id="m-overview" class="tab active">
+          <div class="stats" id="mStats"></div>
+          <div class="card">
+            <div class="card-head"><h3>Contribution Breakdown</h3></div>
+            <div class="chart-wrap"><canvas id="mChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Recent Transactions</h3></div>
+            <table class="table" id="mRecentTable">
+              <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="m-transactions" class="tab">
+          <div class="card">
+            <div class="card-head">
+              <h3>All My Transactions</h3>
+              <input type="text" class="search" id="mSearch" placeholder="🔍 Search..."/>
+            </div>
+            <table class="table" id="mAllTable">
+              <thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Verified By</th><th>Notes</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="pagination" id="mPagination"></div>
+          </div>
+        </div>
+
+        <div id="m-submit" class="tab">
+          <div class="card form-card">
+            <h3>Submit Proof of Payment</h3>
+            <form id="submitForm" onsubmit="submitPayment(event)">
+              <div class="field">
+                <label>Levy Type</label>
+                <select id="sType" required>
+                  <option>Annual Dues</option><option>Burial Levy</option>
+                  <option>Life Insurance Levy</option><option>Party Donations</option><option>Support Levy</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Amount (₦)</label>
+                <input type="number" id="sAmount" min="1" step="0.01" required/>
+              </div>
+              <div class="field">
+                <label>Payment Reference / Receipt No.</label>
+                <input type="text" id="sRef" required/>
+              </div>
+              <div class="field">
+                <label>Upload Proof of Payment (image/PDF)</label>
+                <div class="file-drop" id="fileDrop">
+                  <input type="file" id="sProof" accept="image/*,application/pdf" required hidden/>
+                  <div class="file-drop-content">
+                    <div style="font-size:2rem">📎</div>
+                    <p><strong>Click to upload</strong> or drag & drop</p>
+                    <small>PNG, JPG, PDF up to 5MB</small>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Notes (optional)</label>
+                <textarea id="sNotes" rows="3"></textarea>
+              </div>
+              <button class="btn btn-primary" type="submit">Submit for Verification →</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="m-reports" class="tab">
+          <div class="card">
+            <h3>Financial Reports</h3>
+            <p class="sub">Download your personal contribution summary as PDF.</p>
+            <div class="report-actions">
+              <button class="btn btn-primary" onclick="downloadReport('member-month')">📄 This Month</button>
+              <button class="btn btn-primary" onclick="downloadReport('member-year')">📄 This Year</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN DASHBOARD ============ -->
+  <section id="adminDash" class="view">
+    <div class="dash">
+      <aside class="sidebar" id="aSidebar">
+        <div class="sidebar-head">
+          <div class="logo sm">🏘️ <span id="aVillageName">Village</span></div>
+          <button class="sidebar-close" onclick="toggleSidebar('aSidebar')">✕</button>
+        </div>
+        <nav class="side-nav">
+          <a data-tab="a-overview" class="active">📊 Overview</a>
+          <a data-tab="a-pending">⏳ Pending <span class="nav-badge" id="pendingBadge">0</span></a>
+          <a data-tab="a-all">💳 All Transactions</a>
+          <a data-tab="a-members">👥 Members</a>
+          <a data-tab="a-reports">📄 Reports</a>
+          <a data-tab="a-audit">🕒 Audit Log</a>
+        </nav>
+        <div class="sidebar-foot">
+          <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+          <button class="btn btn-ghost btn-block" onclick="logout()">Logout</button>
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <button class="hamburger small" onclick="toggleSidebar('aSidebar')">☰</button>
+          <h2 id="aWelcome">Admin Panel</h2>
+          <span class="badge admin">Admin</span>
+        </header>
+
+        <div id="a-overview" class="tab active">
+          <div class="stats" id="aStats"></div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h3>Collection by Levy Type</h3></div>
+              <div class="chart-wrap"><canvas id="aChartBar"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Status Distribution</h3></div>
+              <div class="chart-wrap"><canvas id="aChartPie"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Levy Summary (Current Month)</h3></div>
+            <table class="table" id="aLevySummary">
+              <thead><tr><th>Levy Type</th><th>Total Collected</th><th>Pending</th><th>Transactions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="a-pending" class="tab">
+          <div class="card">
+            <div class="card-head"><h3>Pending Verifications</h3></div>
+            <table class="table" id="aPendingTable">
+              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th><th>Reference</th><th>Proof</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="a-all" class="tab">
+          <div class="card">
+            <div class="card-head">
+              <h3>All Transactions</h3>
+            </div>
+            <div class="filters">
+              <select id="fType"><option value="">All Types</option>
+                <option>Annual Dues</option><option>Burial Levy</option>
+                <option>Life Insurance Levy</option><option>Party Donations</option><option>Support Levy</option>
+              </select>
+              <select id="fStatus"><option value="">All Statuses</option>
+                <option>pending</option><option>verified</option><option>rejected</option>
+              </select>
+              <input type="text" id="fMember" placeholder="🔍 Search member..."/>
+            </div>
+            <table class="table" id="aAllTable">
+              <thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th><th>Status</th><th>Verified By</th><th>Edited By</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="pagination" id="aPagination"></div>
+          </div>
+        </div>
+
+        <div id="a-members" class="tab">
+          <div class="card">
+            <div class="card-head">
+              <h3>Members</h3>
+              <button class="btn btn-primary" onclick="openMemberModal()">+ Add Member</button>
+            </div>
+            <table class="table" id="aMembersTable">
+              <thead><tr><th>Name</th><th>Username</th><th>Total Contributions</th><th>Actions</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="a-reports" class="tab">
+          <div class="card">
+            <h3>Financial Reports</h3>
+            <p class="sub">Download union-wide reports with charts for transparency.</p>
+            <div class="report-actions">
+              <button class="btn btn-primary" onclick="downloadReport('village-month')">📄 This Month</button>
+              <button class="btn btn-primary" onclick="downloadReport('village-year')">📄 This Year</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="a-audit" class="tab">
+          <div class="card">
+            <h3>Audit Log</h3>
+            <p class="sub">Every edit, verification, and addition is recorded here.</p>
+            <table class="table" id="aAuditTable">
+              <thead><tr><th>Timestamp</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- ============ MODALS ============ -->
+  <div class="modal" id="verifyModal">
+    <div class="modal-card">
+      <h3>Verify / Reject Payment</h3>
+      <div id="vmDetails"></div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="vmNotes" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('verifyModal')">Cancel</button>
+        <button class="btn btn-danger" onclick="rejectPayment()">Reject</button>
+        <button class="btn btn-primary" onclick="verifyPayment()">✓ Verify & Record</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-card">
+      <h3>Edit Transaction</h3>
+      <input type="hidden" id="emId"/>
+      <div class="field">
+        <label>Amount (₦)</label>
+        <input type="number" id="emAmount" step="0.01"/>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="emNotes" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('editModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="memberModal">
+    <div class="modal-card">
+      <h3>Add Member</h3>
+      <div class="field"><label>Full Name</label><input type="text" id="mmName"/></div>
+      <div class="field"><label>Username</label><input type="text" id="mmUser"/></div>
+      <div class="field"><label>Password</label><input type="text" id="mmPass"/></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('memberModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="addMember()">Add Member</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
