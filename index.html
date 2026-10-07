@@ -1,39 +1,874 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#071711" />
-  <meta
-    name="description"
-    content="UnionLedger — secure financial management for village unions and community associations."
-  />
-  <title>UnionLedger — Village Union Financial Management</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071711">
+<title>UnionLedger — Community Finance</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
-    rel="stylesheet"
-  />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-  <!-- =========================
-       NAVIGATION
-  ========================== -->
+<header class="site-header" id="siteHeader">
 
-  <header class="site-header" id="siteHeader">
-    <div class="container nav-container">
+  <div class="container nav-container">
+
+    <a href="#home" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+
+      <span>
+        <strong>Union<span>Ledger</span></strong>
+        <small>Community Finance</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#security">Security</a>
+      <a href="#reports">Reports</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="btn btn-ghost" data-login="member">
+        Member Login
+      </button>
+
+      <button class="btn btn-primary" data-login="admin">
+        Admin Portal
+      </button>
+    </div>
+
+    <button
+      class="mobile-menu-button"
+      id="mobileMenuButton"
+      aria-expanded="false"
+      aria-label="Open menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu">
+
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#security">Security</a>
+    <a href="#reports">Reports</a>
+
+    <button class="btn btn-ghost" data-login="member">
+      Member Login
+    </button>
+
+    <button class="btn btn-primary" data-login="admin">
+      Admin Portal
+    </button>
+
+  </div>
+
+</header>
+
+
+<main id="home">
+
+<section class="hero">
+
+  <div class="hero-glow hero-glow-one"></div>
+  <div class="hero-glow hero-glow-two"></div>
+
+  <div class="container hero-grid">
+
+    <div class="hero-content">
+
+      <div class="eyebrow">
+        <span class="pulse-dot"></span>
+        Built for village unions & community associations
+      </div>
+
+      <h1>
+        Your union's money.
+        <span>Clear. Secure. Accountable.</span>
+      </h1>
+
+      <p class="hero-description">
+        A modern financial management platform for recording dues,
+        levies, donations, attendance and community support — with
+        verification, transparent reporting and complete accountability.
+      </p>
+
+      <div class="hero-actions">
+
+        <button
+          class="btn btn-primary btn-large"
+          data-login="member"
+        >
+          Access Member Portal <span>→</span>
+        </button>
+
+        <button
+          class="btn btn-outline btn-large"
+          data-scroll="how-it-works"
+        >
+          See How It Works
+        </button>
+
+      </div>
+
+      <div class="trust-row">
+
+        <div class="avatars">
+          <span>AO</span>
+          <span>CM</span>
+          <span>EK</span>
+          <span>+</span>
+        </div>
+
+        <div>
+          <strong>Built for trusted community finance</strong>
+          <small>Every verified action leaves a record.</small>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="hero-dashboard">
+
+      <div class="dashboard-window">
+
+        <div class="window-top">
+
+          <div class="window-dots">
+            <i></i><i></i><i></i>
+          </div>
+
+          <span>UnionLedger Dashboard</span>
+
+          <span class="live-status">
+            <b></b> Live
+          </span>
+
+        </div>
+
+        <div class="dashboard-body">
+
+          <div class="dashboard-heading">
+
+            <div>
+              <small>GOOD MORNING, ADMIN</small>
+              <h3>Obodo Union</h3>
+            </div>
+
+            <div class="dashboard-date">
+              October 2026
+            </div>
+
+          </div>
+
+
+          <div class="mini-stat-grid">
+
+            <div class="mini-stat">
+              <span>Total Collected</span>
+              <strong>₦18.42m</strong>
+              <small class="positive">↑ 12.8%</small>
+            </div>
+
+            <div class="mini-stat">
+              <span>This Month</span>
+              <strong>₦2.84m</strong>
+              <small class="positive">↑ 8.4%</small>
+            </div>
+
+            <div class="mini-stat">
+              <span>Members</span>
+              <strong>428</strong>
+              <small>Active members</small>
+            </div>
+
+          </div>
+
+
+          <div class="chart-card">
+
+            <div class="chart-header">
+
+              <div>
+                <span>Monthly Collections</span>
+                <strong>₦2.84m</strong>
+              </div>
+
+              <select id="chartFilter">
+                <option value="6">Last 6 months</option>
+                <option value="12">Last 12 months</option>
+                <option value="year">This year</option>
+              </select>
+
+            </div>
+
+            <div class="chart">
+
+              <div class="chart-grid"></div>
+
+              <svg
+                viewBox="0 0 600 190"
+                preserveAspectRatio="none"
+              >
+
+                <defs>
+                  <linearGradient
+                    id="areaGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-color="#c7a45a"
+                      stop-opacity=".32"
+                    />
+
+                    <stop
+                      offset="100%"
+                      stop-color="#c7a45a"
+                      stop-opacity="0"
+                    />
+                  </linearGradient>
+                </defs>
+
+                <path
+                  d="M0,155
+                  C50,145 60,130 100,138
+                  C145,148 160,100 205,112
+                  C245,125 265,76 310,92
+                  C355,108 370,62 415,70
+                  C455,76 470,44 515,52
+                  C550,58 570,24 600,30
+                  L600,190 L0,190 Z"
+                  fill="url(#areaGradient)"
+                />
+
+                <path
+                  d="M0,155
+                  C50,145 60,130 100,138
+                  C145,148 160,100 205,112
+                  C245,125 265,76 310,92
+                  C355,108 370,62 415,70
+                  C455,76 470,44 515,52
+                  C550,58 570,24 600,30"
+                  fill="none"
+                  stroke="#c7a45a"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                />
+
+              </svg>
+
+              <div class="chart-labels">
+                <span>May</span>
+                <span>Jun</span>
+                <span>Jul</span>
+                <span>Aug</span>
+                <span>Sep</span>
+                <span>Oct</span>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="activity-card">
+
+            <div class="activity-heading">
+
+              <strong>Recent Activity</strong>
+
+              <button data-login="admin">
+                View all
+              </button>
+
+            </div>
+
+
+            <div class="activity-row">
+
+              <span class="activity-icon green">₦</span>
+
+              <div>
+                <strong>Annual Dues</strong>
+                <small>Chinedu Okafor · Verified</small>
+              </div>
+
+              <strong>+₦25,000</strong>
+
+            </div>
+
+
+            <div class="activity-row">
+
+              <span class="activity-icon gold">₦</span>
+
+              <div>
+                <strong>Burial Levy</strong>
+                <small>Emeka Nwosu · Pending verification</small>
+              </div>
+
+              <strong>+₦10,000</strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="trust-strip">
+
+  <div class="container trust-strip-inner">
+
+    <span>Designed around transparency</span>
+
+    <div class="trust-items">
+      <span>✓ Verified payments</span>
+      <span>✓ Complete audit trail</span>
+      <span>✓ Monthly reports</span>
+      <span>✓ Village-level privacy</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="section" id="features">
+
+  <div class="container">
+
+    <div class="section-heading centered">
+
+      <div class="eyebrow">
+        Everything in one place
+      </div>
+
+      <h2>
+        Built for the way
+        <span>unions actually operate.</span>
+      </h2>
+
+      <p>
+        Replace notebooks, spreadsheets and scattered WhatsApp receipts
+        with one trusted financial record.
+      </p>
+
+    </div>
+
+
+    <div class="feature-grid">
+
+      <article class="feature-card featured-card">
+
+        <div class="feature-icon">₦</div>
+
+        <h3>Member Contributions</h3>
+
+        <p>
+          Record annual dues, burial levies, life insurance,
+          party donations and community support payments.
+        </p>
+
+        <div class="feature-tags">
+          <span>Annual Dues</span>
+          <span>Burial Levy</span>
+          <span>Insurance</span>
+        </div>
+
+      </article>
+
+
+      <article class="feature-card">
+
+        <div class="feature-icon blue">✓</div>
+
+        <h3>Payment Verification</h3>
+
+        <p>
+          Members submit proof of payment. Admin reviews it
+          before the official financial record is updated.
+        </p>
+
+        <div class="feature-demo">
+          <span class="status pending">Pending</span>
+          <span>Payment proof.pdf</span>
+          <span class="check">✓</span>
+        </div>
+
+      </article>
+
+
+      <article class="feature-card">
+
+        <div class="feature-icon purple">◉</div>
+
+        <h3>Complete Accountability</h3>
+
+        <p>
+          Every administrative change records who made it,
+          what changed and exactly when it happened.
+        </p>
+
+        <div class="audit-preview">
+          <strong>Admin Activity</strong>
+          <small>Admin: Chukwudi Nnamani</small>
+          <small>Updated · 04 Oct 2026 · 14:38</small>
+        </div>
+
+      </article>
+
+
+      <article class="feature-card">
+
+        <div class="feature-icon orange">≋</div>
+
+        <h3>Attendance Register</h3>
+
+        <p>
+          Members mark attendance digitally, while administrators
+          approve it against the physical meeting register.
+        </p>
+
+        <div class="report-preview">
+          <span>MEETING REGISTER</span>
+          <strong>94% verified attendance</strong>
+          <small>Member history available</small>
+        </div>
+
+      </article>
+
+
+      <article class="feature-card">
+
+        <div class="feature-icon orange">▣</div>
+
+        <h3>Financial Reports</h3>
+
+        <p>
+          Generate clean monthly and annual financial reports
+          ready to download and present at union meetings.
+        </p>
+
+        <div class="report-preview">
+          <span>OCTOBER 2026</span>
+          <strong>₦2.84m</strong>
+          <small>Download PDF →</small>
+        </div>
+
+      </article>
+
+
+      <article class="feature-card wide-card">
+
+        <div class="feature-icon green">◈</div>
+
+        <div>
+          <h3>Built for Multiple Villages</h3>
+
+          <p>
+            Each village operates inside its own secure financial
+            environment. Members and administrators only see
+            information belonging to their village.
+          </p>
+        </div>
+
+        <div class="village-pills">
+          <span>Village A</span>
+          <span>Village B</span>
+          <span>Village C</span>
+          <span>Village D</span>
+          <span>+6 more</span>
+        </div>
+
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="section dark-section" id="how-it-works">
+
+  <div class="container">
+
+    <div class="section-heading centered">
+
+      <div class="eyebrow">Simple workflow</div>
+
+      <h2>
+        From payment proof
+        <span>to verified record.</span>
+      </h2>
+
+      <p>
+        Designed so members know exactly what happens to their
+        payments and attendance.
+      </p>
+
+    </div>
+
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-number">01</div>
+        <div class="step-icon">↑</div>
+        <h3>Member submits</h3>
+        <p>
+          Member uploads payment proof or requests attendance confirmation.
+        </p>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div class="step">
+        <div class="step-number">02</div>
+        <div class="step-icon">◌</div>
+        <h3>Admin verifies</h3>
+        <p>
+          Admin reviews the payment or attendance against the
+          appropriate physical record.
+        </p>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div class="step">
+        <div class="step-number">03</div>
+        <div class="step-icon">✓</div>
+        <h3>Record approved</h3>
+        <p>
+          The official member register is updated only after
+          administrator approval.
+        </p>
+      </div>
+
+      <div class="step-line"></div>
+
+      <div class="step">
+        <div class="step-number">04</div>
+        <div class="step-icon">▣</div>
+        <h3>Report generated</h3>
+        <p>
+          Verified transactions and attendance contribute to annual reports.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="section" id="security">
+
+  <div class="container security-grid">
+
+    <div class="security-content">
+
+      <div class="eyebrow">Privacy by design</div>
+
+      <h2>
+        Every village gets
+        <span>its own secure space.</span>
+      </h2>
+
+      <p>
+        Tenant-based access control prevents one village from accessing
+        another village's financial or member records.
+      </p>
+
+
+      <div class="security-list">
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong>Unique village access</strong>
+            <p>
+              Members only access records belonging to their village.
+            </p>
+          </div>
+        </div>
+
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong>Role-based permissions</strong>
+            <p>
+              Members and administrators have different capabilities.
+            </p>
+          </div>
+        </div>
+
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong>Audit history</strong>
+            <p>
+              Administrative edits retain the administrator,
+              action and timestamp.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="security-visual">
+
+      <div class="security-card">
+
+        <div class="security-card-top">
+
+          <span class="lock-icon">⌾</span>
+
+          <div>
+            <strong>Village Data Protected</strong>
+            <small>Tenant isolation active</small>
+          </div>
+
+          <span class="secure-badge">
+            SECURE
+          </span>
+
+        </div>
+
+
+        <div class="data-flow">
+
+          <div class="data-node">
+            <span>01</span>
+            <strong>Village A</strong>
+            <small>₦18.42m</small>
+          </div>
+
+          <div class="shield">✓</div>
+
+          <div class="data-node">
+            <span>02</span>
+            <strong>Village B</strong>
+            <small>₦11.74m</small>
+          </div>
+
+        </div>
+
+
+        <div class="security-footer">
+          <span>Access boundary</span>
+          <strong>Village ID enforced</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="section reports-section" id="reports">
+
+  <div class="container reports-grid">
+
+    <div class="reports-content">
+
+      <div class="eyebrow">Financial intelligence</div>
+
+      <h2>
+        Know exactly where
+        <span>the money went.</span>
+      </h2>
+
+      <p>
+        Monthly and annual reports turn every verified transaction
+        and attendance record into a clear financial picture.
+      </p>
+
+
+      <div class="report-options">
+
+        <div class="report-option">
+          <span>01</span>
+          <div>
+            <strong>Monthly financial report</strong>
+            <small>Income by contribution type</small>
+          </div>
+        </div>
+
+        <div class="report-option">
+          <span>02</span>
+          <div>
+            <strong>Annual financial report</strong>
+            <small>Full-year financial and attendance summary</small>
+          </div>
+        </div>
+
+        <div class="report-option">
+          <span>03</span>
+          <div>
+            <strong>Member contribution & attendance statement</strong>
+            <small>Individual verified history</small>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="report-document">
+
+      <div class="pdf-toolbar">
+        <span>Financial Report</span>
+        <button id="demoReportBtn">↓ PDF</button>
+      </div>
+
+      <div class="pdf-page">
+
+        <div class="pdf-logo">
+          UNION<span>LEDGER</span>
+        </div>
+
+        <small>OBODO UNION</small>
+
+        <h3>Financial Statement</h3>
+
+        <span class="pdf-period">
+          October 2026
+        </span>
+
+        <div class="pdf-total">
+          <small>Total verified collections</small>
+          <strong>₦2,840,500</strong>
+        </div>
+
+        <div class="pdf-bars">
+
+          <div>
+            <span>Annual Dues</span>
+            <b style="width:82%"></b>
+            <strong>₦1.42m</strong>
+          </div>
+
+          <div>
+            <span>Burial Levy</span>
+            <b style="width:53%"></b>
+            <strong>₦740k</strong>
+          </div>
+
+          <div>
+            <span>Life Insurance</span>
+            <b style="width:38%"></b>
+            <strong>₦420k</strong>
+          </div>
+
+          <div>
+            <span>Support Levy</span>
+            <b style="width:23%"></b>
+            <strong>₦260k</strong>
+          </div>
+
+        </div>
+
+        <div class="pdf-footer">
+          <span>Generated by UnionLedger</span>
+          <span>Verified records only</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<section class="cta-section">
+
+  <div class="container">
+
+    <div class="cta-card">
+
+      <div class="eyebrow">
+        Bring your union online
+      </div>
+
+      <h2>
+        Give your members
+        <span>financial confidence.</span>
+      </h2>
+
+      <p>
+        One secure place for contributions, attendance,
+        verification, records and reports.
+      </p>
+
+      <button
+        class="btn btn-primary btn-large"
+        data-login="member"
+      >
+        Enter Member Portal →
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<footer class="site-footer">
+
+  <div class="container footer-grid">
+
+    <div class="footer-brand">
 
       <a href="#home" class="brand">
         <span class="brand-mark">
-          <span></span>
-          <span></span>
-          <span></span>
+          <i></i><i></i><i></i>
         </span>
 
         <span>
@@ -42,922 +877,105 @@
         </span>
       </a>
 
-      <nav class="desktop-nav" aria-label="Main navigation">
-        <a href="#features">Features</a>
-        <a href="#how-it-works">How It Works</a>
-        <a href="#security">Security</a>
-        <a href="#reports">Reports</a>
-      </nav>
+      <p>
+        Modern financial management for trusted community unions.
+      </p>
 
-      <div class="nav-actions">
-        <button class="btn btn-ghost" onclick="openLoginModal()">
-          Member Login
-        </button>
+    </div>
 
-        <button class="btn btn-primary" onclick="openLoginModal('admin')">
-          Admin Portal
-        </button>
-      </div>
+
+    <div>
+      <h4>Platform</h4>
+      <a href="#features">Features</a>
+      <a href="#reports">Reports</a>
+      <a href="#security">Security</a>
+    </div>
+
+
+    <div>
+      <h4>Access</h4>
+      <a href="#" data-login="member">Member Login</a>
+      <a href="#" data-login="admin">Admin Portal</a>
+    </div>
+
+
+    <div>
+      <h4>Support</h4>
+      <a href="#">Help Centre</a>
+      <a href="#">Contact Admin</a>
+      <a href="#">Privacy</a>
+    </div>
+
+  </div>
+
+
+  <div class="container footer-bottom">
+    <span>
+      © 2026 UnionLedger. Built for community trust.
+    </span>
+
+    <span>
+      Secure • Transparent • Accountable
+    </span>
+  </div>
+
+</footer>
+
+
+<!-- AUTH MODAL -->
+
+<div
+  class="modal-overlay"
+  id="authModal"
+  aria-hidden="true"
+>
+
+  <div class="modal modal-large">
+
+    <button
+      class="modal-close"
+      data-close-modal
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+
+    <div class="modal-logo">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+    </div>
+
+
+    <div class="auth-tabs">
 
       <button
-        class="mobile-menu-button"
-        id="mobileMenuButton"
-        aria-label="Open navigation"
-        aria-expanded="false"
+        class="auth-tab active"
+        data-auth-tab="login"
       >
-        <span></span>
-        <span></span>
-        <span></span>
+        Sign in
+      </button>
+
+      <button
+        class="auth-tab"
+        data-auth-tab="register"
+      >
+        First-time member
       </button>
 
     </div>
 
-    <div class="mobile-menu" id="mobileMenu">
-      <a href="#features">Features</a>
-      <a href="#how-it-works">How It Works</a>
-      <a href="#security">Security</a>
-      <a href="#reports">Reports</a>
 
-      <button class="btn btn-ghost" onclick="openLoginModal()">
-        Member Login
-      </button>
+    <!-- LOGIN -->
 
-      <button class="btn btn-primary" onclick="openLoginModal('admin')">
-        Admin Portal
-      </button>
-    </div>
-  </header>
-
-
-  <!-- =========================
-       HERO
-  ========================== -->
-
-  <main id="home">
-
-    <section class="hero">
-
-      <div class="hero-glow hero-glow-one"></div>
-      <div class="hero-glow hero-glow-two"></div>
-
-      <div class="container hero-grid">
-
-        <div class="hero-content">
-
-          <div class="eyebrow">
-            <span class="pulse-dot"></span>
-            Built for village unions & community associations
-          </div>
-
-          <h1>
-            Your union's money.
-            <span>Clear. Secure. Accountable.</span>
-          </h1>
-
-          <p class="hero-description">
-            A modern financial management platform for recording dues,
-            levies, donations and community support — with verification,
-            transparent reporting and complete accountability.
-          </p>
-
-          <div class="hero-actions">
-
-            <button class="btn btn-primary btn-large" onclick="openLoginModal()">
-              Access Member Portal
-              <span>→</span>
-            </button>
-
-            <button class="btn btn-outline btn-large" onclick="scrollToSection('how-it-works')">
-              See How It Works
-            </button>
-
-          </div>
-
-          <div class="trust-row">
-            <div class="avatars">
-              <span>AO</span>
-              <span>CM</span>
-              <span>EK</span>
-              <span>+</span>
-            </div>
-
-            <div>
-              <strong>Built for trusted community finance</strong>
-              <small>Every transaction leaves a record.</small>
-            </div>
-          </div>
-
-        </div>
-
-
-        <!-- Dashboard preview -->
-
-        <div class="hero-dashboard">
-
-          <div class="dashboard-window">
-
-            <div class="window-top">
-              <div class="window-dots">
-                <i></i>
-                <i></i>
-                <i></i>
-              </div>
-
-              <span>UnionLedger Dashboard</span>
-
-              <span class="live-status">
-                <b></b> Live
-              </span>
-            </div>
-
-            <div class="dashboard-body">
-
-              <div class="dashboard-heading">
-                <div>
-                  <small>GOOD MORNING, ADMIN</small>
-                  <h3>Obodo Union</h3>
-                </div>
-
-                <div class="dashboard-date">
-                  October 2026
-                </div>
-              </div>
-
-
-              <div class="mini-stat-grid">
-
-                <div class="mini-stat">
-                  <span>Total Collected</span>
-                  <strong>₦18.42m</strong>
-                  <small class="positive">↑ 12.8%</small>
-                </div>
-
-                <div class="mini-stat">
-                  <span>This Month</span>
-                  <strong>₦2.84m</strong>
-                  <small class="positive">↑ 8.4%</small>
-                </div>
-
-                <div class="mini-stat">
-                  <span>Members</span>
-                  <strong>428</strong>
-                  <small>Active members</small>
-                </div>
-
-              </div>
-
-
-              <div class="chart-card">
-
-                <div class="chart-header">
-                  <div>
-                    <span>Monthly Collections</span>
-                    <strong>₦2.84m</strong>
-                  </div>
-
-                  <select id="chartFilter" onchange="changeChartPeriod(this.value)">
-                    <option value="6">Last 6 months</option>
-                    <option value="12">Last 12 months</option>
-                    <option value="year">This year</option>
-                  </select>
-                </div>
-
-                <div class="chart">
-                  <div class="chart-grid"></div>
-
-                  <svg viewBox="0 0 600 190" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#c7a45a" stop-opacity=".32"/>
-                        <stop offset="100%" stop-color="#c7a45a" stop-opacity="0"/>
-                      </linearGradient>
-                    </defs>
-
-                    <path
-                      d="M0,155
-                      C50,145 60,130 100,138
-                      C145,148 160,100 205,112
-                      C245,125 265,76 310,92
-                      C355,108 370,62 415,70
-                      C455,76 470,44 515,52
-                      C550,58 570,24 600,30
-                      L600,190 L0,190 Z"
-                      fill="url(#areaGradient)"
-                    />
-
-                    <path
-                      d="M0,155
-                      C50,145 60,130 100,138
-                      C145,148 160,100 205,112
-                      C245,125 265,76 310,92
-                      C355,108 370,62 415,70
-                      C455,76 470,44 515,52
-                      C550,58 570,24 600,30"
-                      fill="none"
-                      stroke="#c7a45a"
-                      stroke-width="4"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-
-                  <div class="chart-labels">
-                    <span>May</span>
-                    <span>Jun</span>
-                    <span>Jul</span>
-                    <span>Aug</span>
-                    <span>Sep</span>
-                    <span>Oct</span>
-                  </div>
-                </div>
-
-              </div>
-
-
-              <div class="activity-card">
-
-                <div class="activity-heading">
-                  <strong>Recent Activity</strong>
-                  <button onclick="openLoginModal('admin')">View all</button>
-                </div>
-
-                <div class="activity-row">
-                  <span class="activity-icon green">₦</span>
-
-                  <div>
-                    <strong>Annual Dues</strong>
-                    <small>Chinedu Okafor · Verified</small>
-                  </div>
-
-                  <strong>+₦25,000</strong>
-                </div>
-
-                <div class="activity-row">
-                  <span class="activity-icon gold">₦</span>
-
-                  <div>
-                    <strong>Burial Levy</strong>
-                    <small>Emeka Nwosu · Pending verification</small>
-                  </div>
-
-                  <strong>+₦10,000</strong>
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
-
-    <!-- =========================
-         TRUST STRIP
-    ========================== -->
-
-    <section class="trust-strip">
-
-      <div class="container trust-strip-inner">
-
-        <span>Designed around transparency</span>
-
-        <div class="trust-items">
-          <span>✓ Verified payments</span>
-          <span>✓ Complete audit trail</span>
-          <span>✓ Monthly reports</span>
-          <span>✓ Village-level privacy</span>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         FEATURES
-    ========================== -->
-
-    <section class="section" id="features">
-
-      <div class="container">
-
-        <div class="section-heading centered">
-
-          <div class="eyebrow">Everything in one place</div>
-
-          <h2>
-            Built for the way
-            <span>unions actually operate.</span>
-          </h2>
-
-          <p>
-            Replace notebooks, spreadsheets and scattered WhatsApp receipts
-            with one trusted financial record.
-          </p>
-
-        </div>
-
-
-        <div class="feature-grid">
-
-          <article class="feature-card featured-card">
-
-            <div class="feature-icon">
-              ₦
-            </div>
-
-            <h3>Member Contributions</h3>
-
-            <p>
-              Record annual dues, burial levies, life insurance,
-              party donations and community support payments.
-            </p>
-
-            <div class="feature-tags">
-              <span>Annual Dues</span>
-              <span>Burial Levy</span>
-              <span>Insurance</span>
-            </div>
-
-          </article>
-
-
-          <article class="feature-card">
-
-            <div class="feature-icon blue">
-              ✓
-            </div>
-
-            <h3>Payment Verification</h3>
-
-            <p>
-              Members submit proof of payment. Admin verifies it before
-              the official financial record is updated.
-            </p>
-
-            <div class="feature-demo">
-              <span class="status pending">Pending</span>
-              <span>Payment proof.pdf</span>
-              <span class="check">✓</span>
-            </div>
-
-          </article>
-
-
-          <article class="feature-card">
-
-            <div class="feature-icon purple">
-              ◉
-            </div>
-
-            <h3>Complete Accountability</h3>
-
-            <p>
-              Every administrative change records who made it,
-              what changed and exactly when it happened.
-            </p>
-
-            <div class="audit-preview">
-              <strong>Admin Activity</strong>
-              <small>
-                Admin: Chukwudi Nnamani
-              </small>
-              <small>
-                Updated · 04 Oct 2026 · 14:38
-              </small>
-            </div>
-
-          </article>
-
-
-          <article class="feature-card">
-
-            <div class="feature-icon orange">
-              ≋
-            </div>
-
-            <h3>Financial Reports</h3>
-
-            <p>
-              Generate clean monthly and annual financial reports
-              ready to download and present at union meetings.
-            </p>
-
-            <div class="report-preview">
-              <span>OCTOBER 2026</span>
-              <strong>₦2,840,500</strong>
-              <small>Download PDF →</small>
-            </div>
-
-          </article>
-
-
-          <article class="feature-card wide-card">
-
-            <div class="feature-icon green">
-              ◈
-            </div>
-
-            <div>
-              <h3>Built for Multiple Villages</h3>
-
-              <p>
-                Each village operates inside its own secure financial
-                environment. Members and administrators only see the
-                information belonging to their village.
-              </p>
-            </div>
-
-            <div class="village-pills">
-              <span>Village A</span>
-              <span>Village B</span>
-              <span>Village C</span>
-              <span>Village D</span>
-              <span>+6 more</span>
-            </div>
-
-          </article>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         HOW IT WORKS
-    ========================== -->
-
-    <section class="section dark-section" id="how-it-works">
-
-      <div class="container">
-
-        <div class="section-heading centered">
-
-          <div class="eyebrow">Simple workflow</div>
-
-          <h2>
-            From payment proof
-            <span>to verified record.</span>
-          </h2>
-
-          <p>
-            Designed so members know exactly what happens to their payments.
-          </p>
-
-        </div>
-
-
-        <div class="steps">
-
-          <div class="step">
-
-            <div class="step-number">01</div>
-
-            <div class="step-icon">↑</div>
-
-            <h3>Member submits</h3>
-
-            <p>
-              Member logs in and uploads payment proof with
-              the contribution type and amount.
-            </p>
-
-          </div>
-
-
-          <div class="step-line"></div>
-
-
-          <div class="step">
-
-            <div class="step-number">02</div>
-
-            <div class="step-icon">◌</div>
-
-            <h3>Admin verifies</h3>
-
-            <p>
-              Admin reviews the payment proof and confirms
-              that the payment was received.
-            </p>
-
-          </div>
-
-
-          <div class="step-line"></div>
-
-
-          <div class="step">
-
-            <div class="step-number">03</div>
-
-            <div class="step-icon">✓</div>
-
-            <h3>Record updated</h3>
-
-            <p>
-              The official financial record is updated and
-              the member can see their verified contribution.
-            </p>
-
-          </div>
-
-
-          <div class="step-line"></div>
-
-
-          <div class="step">
-
-            <div class="step-number">04</div>
-
-            <div class="step-icon">▣</div>
-
-            <h3>Report generated</h3>
-
-            <p>
-              Transactions automatically contribute to monthly
-              and annual financial reports.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         SECURITY
-    ========================== -->
-
-    <section class="section" id="security">
-
-      <div class="container security-grid">
-
-        <div class="security-content">
-
-          <div class="eyebrow">Privacy by design</div>
-
-          <h2>
-            Every village gets
-            <span>its own secure space.</span>
-          </h2>
-
-          <p>
-            UnionLedger uses tenant-based access control so one village
-            cannot access another village's financial records.
-          </p>
-
-
-          <div class="security-list">
-
-            <div>
-              <span>✓</span>
-              <div>
-                <strong>Unique village access</strong>
-                <p>
-                  Members only access records belonging to their village.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <span>✓</span>
-              <div>
-                <strong>Role-based permissions</strong>
-                <p>
-                  Members and administrators have different capabilities.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <span>✓</span>
-              <div>
-                <strong>Audit history</strong>
-                <p>
-                  Administrative edits retain the administrator,
-                  action and timestamp.
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="security-visual">
-
-          <div class="security-card">
-
-            <div class="security-card-top">
-
-              <span class="lock-icon">⌾</span>
-
-              <div>
-                <strong>Village Data Protected</strong>
-                <small>Tenant isolation active</small>
-              </div>
-
-              <span class="secure-badge">SECURE</span>
-
-            </div>
-
-
-            <div class="data-flow">
-
-              <div class="data-node">
-                <span>01</span>
-                <strong>Village A</strong>
-                <small>₦18.42m</small>
-              </div>
-
-              <div class="shield">✓</div>
-
-              <div class="data-node">
-                <span>02</span>
-                <strong>Village B</strong>
-                <small>₦11.74m</small>
-              </div>
-
-            </div>
-
-
-            <div class="security-footer">
-              <span>Access boundary</span>
-              <strong>Village ID enforced</strong>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         REPORTS
-    ========================== -->
-
-    <section class="section reports-section" id="reports">
-
-      <div class="container reports-grid">
-
-        <div class="reports-content">
-
-          <div class="eyebrow">Financial intelligence</div>
-
-          <h2>
-            Know exactly where
-            <span>the money went.</span>
-          </h2>
-
-          <p>
-            Monthly and annual reports turn every verified transaction
-            into a clear financial picture for executives and members.
-          </p>
-
-
-          <div class="report-options">
-
-            <div class="report-option">
-              <span>01</span>
-              <div>
-                <strong>Monthly financial report</strong>
-                <small>Income by contribution type</small>
-              </div>
-            </div>
-
-            <div class="report-option">
-              <span>02</span>
-              <div>
-                <strong>Annual financial report</strong>
-                <small>Full-year financial summary</small>
-              </div>
-            </div>
-
-            <div class="report-option">
-              <span>03</span>
-              <div>
-                <strong>Member contribution history</strong>
-                <small>Individual member statement</small>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="report-document">
-
-          <div class="pdf-toolbar">
-            <span>Financial Report</span>
-
-            <button onclick="downloadDemoReport()">
-              ↓ PDF
-            </button>
-          </div>
-
-          <div class="pdf-page">
-
-            <div class="pdf-logo">
-              UNION<span>LEDGER</span>
-            </div>
-
-            <small>OBODO UNION</small>
-
-            <h3>Financial Statement</h3>
-
-            <span class="pdf-period">October 2026</span>
-
-            <div class="pdf-total">
-              <small>Total verified collections</small>
-              <strong>₦2,840,500</strong>
-            </div>
-
-            <div class="pdf-bars">
-
-              <div>
-                <span>Annual Dues</span>
-                <b style="width:82%"></b>
-                <strong>₦1.42m</strong>
-              </div>
-
-              <div>
-                <span>Burial Levy</span>
-                <b style="width:53%"></b>
-                <strong>₦740k</strong>
-              </div>
-
-              <div>
-                <span>Life Insurance</span>
-                <b style="width:38%"></b>
-                <strong>₦420k</strong>
-              </div>
-
-              <div>
-                <span>Support Levy</span>
-                <b style="width:23%"></b>
-                <strong>₦260k</strong>
-              </div>
-
-            </div>
-
-            <div class="pdf-footer">
-              <span>Generated by UnionLedger</span>
-              <span>Verified records only</span>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================
-         CTA
-    ========================== -->
-
-    <section class="cta-section">
-
-      <div class="container">
-
-        <div class="cta-card">
-
-          <div class="cta-glow"></div>
-
-          <div class="eyebrow">Bring your union online</div>
-
-          <h2>
-            Give your members
-            <span>financial confidence.</span>
-          </h2>
-
-          <p>
-            One secure place for contributions, verification,
-            records and reports.
-          </p>
-
-          <button class="btn btn-primary btn-large" onclick="openLoginModal()">
-            Enter Member Portal →
-          </button>
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- =========================
-       FOOTER
-  ========================== -->
-
-  <footer class="site-footer">
-
-    <div class="container footer-grid">
-
-      <div class="footer-brand">
-
-        <a href="#home" class="brand">
-          <span class="brand-mark">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-
-          <span>
-            <strong>Union<span>Ledger</span></strong>
-            <small>Community Finance</small>
-          </span>
-        </a>
-
-        <p>
-          Modern financial management for trusted community unions.
-        </p>
-
-      </div>
-
-
-      <div>
-        <h4>Platform</h4>
-        <a href="#features">Features</a>
-        <a href="#reports">Reports</a>
-        <a href="#security">Security</a>
-      </div>
-
-
-      <div>
-        <h4>Access</h4>
-        <a href="#" onclick="openLoginModal(); return false;">Member Login</a>
-        <a href="#" onclick="openLoginModal('admin'); return false;">Admin Portal</a>
-      </div>
-
-
-      <div>
-        <h4>Support</h4>
-        <a href="#">Help Centre</a>
-        <a href="#">Contact Admin</a>
-        <a href="#">Privacy</a>
-      </div>
-
-    </div>
-
-
-    <div class="container footer-bottom">
-
-      <span>
-        © 2026 UnionLedger. Built for community trust.
-      </span>
-
-      <span>
-        Secure • Transparent • Accountable
-      </span>
-
-    </div>
-
-  </footer>
-
-
-  <!-- =========================
-       LOGIN MODAL
-  ========================== -->
-
-  <div class="modal-overlay" id="loginModal">
-
-    <div class="modal">
-
-      <button class="modal-close" onclick="closeLoginModal()">
-        ×
-      </button>
-
-      <div class="modal-logo">
-        <span class="brand-mark">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
-      </div>
+    <section id="loginPanel">
 
       <div class="modal-heading">
 
-        <div class="eyebrow">Secure access</div>
+        <div class="eyebrow">
+          Secure access
+        </div>
 
         <h2 id="loginTitle">
           Welcome back
@@ -970,43 +988,29 @@
       </div>
 
 
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <form id="loginForm">
 
         <div class="form-group">
 
-          <label for="village">
+          <label for="loginVillage">
             Village Union
           </label>
 
-          <select id="village" required>
-
-            <option value="">Select your village</option>
-            <option>Obodo Union</option>
-            <option>Umuahia Union</option>
-            <option>Umueze Union</option>
-            <option>Umunze Union</option>
-            <option>Osumenyi Union</option>
-            <option>Agulu Union</option>
-            <option>Nnewi Union</option>
-            <option>Awka Union</option>
-            <option>Orlu Union</option>
-            <option>Nsukka Union</option>
-
-          </select>
+          <select id="loginVillage" required></select>
 
         </div>
 
 
         <div class="form-group">
 
-          <label for="loginEmail">
-            Email / Member ID
+          <label for="loginId">
+            Member ID / Admin ID
           </label>
 
           <input
-            id="loginEmail"
-            type="text"
-            placeholder="Enter your member ID"
+            id="loginId"
+            autocomplete="username"
+            placeholder="e.g. UO-0001 or ADMIN-001"
             required
           />
 
@@ -1024,14 +1028,13 @@
             <input
               id="loginPassword"
               type="password"
-              placeholder="Enter password"
+              autocomplete="current-password"
               required
             />
 
             <button
               type="button"
-              onclick="togglePassword()"
-              aria-label="Show password"
+              id="togglePassword"
             >
               ◉
             </button>
@@ -1044,18 +1047,21 @@
         <div class="login-options">
 
           <label class="checkbox-label">
-            <input type="checkbox" />
+            <input type="checkbox" id="rememberMe">
             <span>Remember me</span>
           </label>
 
-          <a href="#" onclick="showForgotPassword(event)">
+          <a href="#" id="forgotPassword">
             Forgot password?
           </a>
 
         </div>
 
 
-        <button class="btn btn-primary btn-full" type="submit">
+        <button
+          class="btn btn-primary btn-full"
+          type="submit"
+        >
           Sign In
         </button>
 
@@ -1063,32 +1069,183 @@
 
 
       <div class="login-footer">
-        <span>Having trouble?</span>
-        <a href="#">Contact your union administrator</a>
+        <span>First time using UnionLedger?</span>
+        <a href="#" id="showRegister">
+          Request your member login
+        </a>
       </div>
 
-    </div>
+    </section>
+
+
+    <!-- MEMBER REGISTRATION -->
+
+    <section id="registerPanel" hidden>
+
+      <div class="modal-heading">
+
+        <div class="eyebrow">
+          Member verification
+        </div>
+
+        <h2>
+          Request your login
+        </h2>
+
+        <p>
+          Enter your name exactly as it appears in the union's
+          official register. Admin will verify it before
+          credentials are generated.
+        </p>
+
+      </div>
+
+
+      <form id="registerForm">
+
+        <div class="form-group">
+
+          <label for="regVillage">
+            Village Union
+          </label>
+
+          <select id="regVillage" required></select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="regFullName">
+            Full name exactly as in register
+          </label>
+
+          <input
+            id="regFullName"
+            placeholder="e.g. Chinedu Okafor"
+            required
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="regPhone">
+            Phone number
+          </label>
+
+          <input
+            id="regPhone"
+            type="tel"
+            placeholder="08012345678"
+            required
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="regMemberNo">
+            Member / register number (if known)
+          </label>
+
+          <input
+            id="regMemberNo"
+            placeholder="Optional"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="regNote">
+            Additional verification note
+          </label>
+
+          <textarea
+            id="regNote"
+            rows="3"
+            placeholder="Any information that will help the administrator identify you."
+          ></textarea>
+
+        </div>
+
+
+        <button
+          class="btn btn-primary btn-full"
+          type="submit"
+        >
+          Submit Verification Request
+        </button>
+
+      </form>
+
+
+      <div class="login-footer">
+        Already have generated credentials?
+        <a href="#" id="showLogin">
+          Sign in
+        </a>
+      </div>
+
+    </section>
 
   </div>
 
+</div>
 
-  <!-- =========================
-       TOAST
-  ========================== -->
 
-  <div class="toast" id="toast">
+<!-- APPLICATION MODAL -->
 
-    <span class="toast-icon">✓</span>
+<div
+  class="modal-overlay"
+  id="appModal"
+  aria-hidden="true"
+>
 
-    <div>
-      <strong id="toastTitle">Success</strong>
-      <small id="toastMessage">Action completed.</small>
-    </div>
+  <div class="modal app-modal">
+
+    <button
+      class="modal-close"
+      data-close-app
+      aria-label="Close"
+    >
+      ×
+    </button>
+
+    <div id="appRoot"></div>
 
   </div>
 
+</div>
 
-  <script src="script.js"></script>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast">
+
+  <span class="toast-icon">
+    ✓
+  </span>
+
+  <div>
+    <strong id="toastTitle">
+      Success
+    </strong>
+
+    <small id="toastMessage">
+      Action completed.
+    </small>
+  </div>
+
+</div>
+
+
+<script src="script.js"></script>
 
 </body>
 </html>
+```
