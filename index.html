@@ -19,7 +19,6 @@
   </div>
 </nav>
 
-<!-- LANDING -->
 <section id="landingView">
   <div class="hero">
     <div class="hero-left">
@@ -47,7 +46,6 @@
   <div class="village-strip" id="villageStrip"></div>
 </section>
 
-<!-- DASHBOARD -->
 <section id="dashboardView" class="dashboard hidden">
   <aside class="sidebar">
     <div class="side-top"><div class="v-tag" id="vTag">VILLAGE</div><h3 id="uName">Name</h3><p id="uMeta">ID</p></div>
@@ -57,7 +55,6 @@
   <main class="main"><div id="mainPanel"></div></main>
 </section>
 
-<!-- LOGIN MODAL -->
 <div id="loginModal" class="modal hidden">
   <div class="modal-box">
     <button class="x" onclick="closeLogin()">✕</button>
@@ -77,7 +74,6 @@
   </div>
 </div>
 
-<!-- PROOF MODAL -->
 <div id="proofModal" class="modal hidden">
   <div class="modal-box">
     <button class="x" onclick="closeProof()">✕</button>
@@ -89,6 +85,20 @@
     <label>Receipt / Bank Alert Screenshot *</label>
     <div class="drop" onclick="document.getElementById('pFile').click()"><span id="dropLabel">Click to upload JPG, PNG or PDF</span><input id="pFile" type="file" hidden accept="image/*,.pdf" onchange="onFile(this)"></div>
     <button class="btn btn-lime w-full mt" onclick="submitProof()">Send to Admin for Verification</button>
+  </div>
+</div>
+
+<!-- PROOF VIEW MODAL - NEW FIX -->
+<div id="viewProofModal" class="modal hidden">
+  <div class="modal-box" style="max-width:600px">
+    <button class="x" onclick="document.getElementById('viewProofModal').classList.add('hidden')">✕</button>
+    <h2>Proof Verification - View Receipt</h2>
+    <p class="sub" id="viewProofMeta"></p>
+    <div id="viewProofContent" style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;min-height:200px;display:grid;place-items:center;margin-top:12px;overflow:auto;max-height:60vh"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-lime w-full" id="viewVerifyBtn">✓ Verify & Stamp Audit</button>
+      <button class="btn btn-ghost w-full" id="viewRejectBtn">Reject</button>
+    </div>
   </div>
 </div>
 
