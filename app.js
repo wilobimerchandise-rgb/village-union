@@ -1,13 +1,17 @@
-
-/* =========================================================
-   UNIONLEDGER — FUNCTIONAL FRONTEND PROTOTYPE
-========================================================= */
-
 "use strict";
 
+/*
+  UNIONLEDGER
+  Sandbox-safe vanilla JavaScript
+
+  IMPORTANT:
+  Tanimawo Code Lab may run this page inside a sandboxed iframe.
+  Therefore this application NEVER assumes localStorage is available.
+*/
+
 
 /* =========================================================
-   BASIC CONFIGURATION
+   CONFIGURATION
 ========================================================= */
 
 const VILLAGES = [
@@ -23,79 +27,156 @@ const VILLAGES = [
   "Nsukka Union"
 ];
 
+const TYPES = [
+  "Annual Dues",
+  "Burial Levy",
+  "Life Insurance Levy",
+  "Party Donation",
+  "Support Levy"
+];
+
 const KEYS = {
   members: "ul_members",
   requests: "ul_requests",
   attendance: "ul_attendance",
   transactions: "ul_transactions",
-  audit: "ul_audit"
+  audit: "ul_audit",
+  session: "ul_session"
 };
 
 
-/*
- * DEMO ADMIN CREDENTIALS
- *
- * Replace this with Supabase Auth in production.
- */
+/* =========================================================
+   DEMO ADMIN
+========================================================= */
 
 const ADMIN = {
   id: "ADMIN-001",
   password: "Admin@123",
-  name: "Union Administrator"
+  name: "Union Administrator",
+  role: "admin"
 };
+
+
+/* =========================================================
+   SANDBOX-SAFE STORAGE
+========================================================= */
+
+const memoryStore = Object.create(null);
+
+const storage = (() => {
+
+  try {
+
+    const s = window.localStorage;
+
+    const probe = "__unionledger_probe__";
+
+    s.setItem(probe, "1");
+    s.removeItem(probe);
+
+    return s;
+
+  } catch (_) {
+
+    /*
+      Tanimawo's sandbox may throw:
+
+      SecurityError:
+      Failed to read the 'localStorage' property from Window.
+
+      We therefore use memory storage instead.
+    */
+
+    return {
+
+      getItem(key) {
+
+        return Object.prototype.hasOwnProperty.call(
+          memoryStore,
+          key
+        )
+          ? memoryStore[key]
+          : null;
+
+      },
+
+      setItem(key, value) {
+
+        memoryStore[key] = String(value);
+
+      },
+
+      removeItem(key) {
+
+        delete memoryStore[key];
+
+      }
+
+    };
+
+  }
+
+})();
 
 
 /* =========================================================
    HELPERS
 ========================================================= */
 
-const $ = (selector) =>
+const $ = selector =>
   document.querySelector(selector);
 
-const $$ = (selector) =>
-  document.querySelectorAll(selector);
-
-
-const uid = (prefix) =>
-  `${prefix}-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 7)
-    .toUpperCase()}`;
-
+const $$ = selector =>
+  Array.from(document.querySelectorAll(selector));
 
 const now = () =>
   new Date().toISOString();
 
+const uid = prefix =>
+  `${prefix}-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 8)
+    .toUpperCase()}`;
 
-function read(key, fallback = []) {
+const money = value =>
+  `₦${Number(value || 0).toLocaleString(
+    "en-NG",
+    {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }
+  )}`;
 
-  try {
-    return JSON.parse(
-      localStorage.getItem(key)
-    ) ?? fallback;
-
-  } catch {
-
-    return fallback;
-
-  }
-
-}
-
-
-function write(key, value) {
-
-  localStorage.setItem(
-    key,
-    JSON.stringify(value)
+const dateOnly = value =>
+  new Date(value).toLocaleDateString(
+    "en-NG",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    }
   );
 
-}
+const dateTime = value =>
+  new Date(value).toLocaleString(
+    "en-NG",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
 
+const norm = value =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
-function esc(value) {
-
-  return String(value ?? "")
+const esc = value =>
+  String(value ?? "")
     .replace(
       /[&<>"']/g,
       character =>
@@ -108,145 +189,54 @@ function esc(value) {
         }[character])
     );
 
-}
 
+function read(key, fallback = []) {
 
-function money(value) {
+  try {
 
-  return new Intl.NumberFormat(
-    "en-NG",
-    {
-      style: "currency",
-      currency: "NGN",
-      maximumFractionDigits: 0
-    }
-  ).format(Number(value) || 0);
+    const value = storage.getItem(key);
 
-}
+    return value
+      ? JSON.parse(value)
+      : fallback;
 
+  } catch (_) {
 
-function fmtDate(value) {
+    return fallback;
 
-  return new Date(value).toLocaleString(
-    "en-NG",
-    {
-      dateStyle: "medium",
-      timeStyle: "short"
-    }
-  );
+  }
 
 }
 
 
-/* =========================================================
-   DEMO DATA
-========================================================= */
+function write(key, value) {
 
-function seed() {
+  try {
 
-  if (!localStorage.getItem(KEYS.members)) {
-
-    write(
-      KEYS.members,
-      [
-        {
-          id: "UO-0001",
-          name: "Chinedu Okafor",
-          phone: "08000000001",
-          village: "Obodo Union",
-          verified: true,
-          active: true,
-          attendance: [],
-          createdAt: now()
-        },
-
-        {
-          id: "UO-0002",
-          name: "Emeka Nwosu",
-          phone: "08000000002",
-          village: "Obodo Union",
-          verified: true,
-          active: true,
-          attendance: [],
-          createdAt: now()
-        },
-
-        {
-          id: "UM-0001",
-          name: "Ngozi Eze",
-          phone: "08000000003",
-          village: "Umuahia Union",
-          verified: true,
-          active: true,
-          attendance: [],
-          createdAt: now()
-        }
-      ]
+    storage.setItem(
+      key,
+      JSON.stringify(value)
     );
 
-  }
+  } catch (_) {
 
+    /* Sandbox-safe: silently use memory fallback. */
 
-  if (!localStorage.getItem(KEYS.requests)) {
-    write(KEYS.requests, []);
-  }
-
-  if (!localStorage.getItem(KEYS.attendance)) {
-    write(KEYS.attendance, []);
-  }
-
-  if (!localStorage.getItem(KEYS.transactions)) {
-    write(KEYS.transactions, []);
-  }
-
-  if (!localStorage.getItem(KEYS.audit)) {
-    write(KEYS.audit, []);
   }
 
 }
 
-seed();
 
+function remove(key) {
 
-/* =========================================================
-   MODALS
-========================================================= */
+  try {
 
-const authModal = $("#authModal");
-const appModal = $("#appModal");
+    storage.removeItem(key);
 
-
-function openModal(element) {
-
-  element.classList.add("active");
-
-  element.setAttribute(
-    "aria-hidden",
-    "false"
-  );
-
-  document.body.style.overflow = "hidden";
+  } catch (_) {}
 
 }
 
-
-function closeModal(element) {
-
-  element.classList.remove("active");
-
-  element.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  document.body.style.overflow = "";
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
 
 function toast(
   title,
@@ -254,35 +244,174 @@ function toast(
   type = "success"
 ) {
 
-  const element = $("#toast");
+  const toastElement = $("#toast");
 
-  const icon =
-    element.querySelector(".toast-icon");
+  if (!toastElement) return;
 
   $("#toastTitle").textContent = title;
-
   $("#toastMessage").textContent = message;
 
-  icon.textContent =
+  toastElement.classList.toggle(
+    "error",
     type === "error"
-      ? "!"
-      : "✓";
+  );
 
-  icon.style.color =
-    type === "error"
-      ? "#e98b8b"
-      : "#5bd28c";
+  toastElement.classList.add("show");
 
-  element.classList.add("show");
+  clearTimeout(window.__unionToastTimer);
 
-  clearTimeout(window.__toast);
-
-  window.__toast =
+  window.__unionToastTimer =
     setTimeout(
-      () =>
-        element.classList.remove("show"),
-      3500
+      () => toastElement.classList.remove("show"),
+      3600
     );
+
+}
+
+
+function currentSession() {
+
+  return read(
+    KEYS.session,
+    null
+  );
+
+}
+
+
+function setSession(session) {
+
+  if (session) {
+
+    write(
+      KEYS.session,
+      session
+    );
+
+  } else {
+
+    remove(KEYS.session);
+
+  }
+
+}
+
+
+/* =========================================================
+   AUDIT
+========================================================= */
+
+function audit(
+  action,
+  detail,
+  metadata = {}
+) {
+
+  const rows =
+    read(KEYS.audit);
+
+  const session =
+    currentSession();
+
+  rows.unshift({
+
+    id: uid("AUD"),
+
+    action,
+
+    detail,
+
+    adminId:
+      session?.id ||
+      ADMIN.id,
+
+    adminName:
+      session?.name ||
+      ADMIN.name,
+
+    at: now(),
+
+    ...metadata
+
+  });
+
+  write(
+    KEYS.audit,
+    rows
+  );
+
+}
+
+
+/* =========================================================
+   INITIAL DEMO DATA
+========================================================= */
+
+function seed() {
+
+  if (
+    read(KEYS.members).length === 0
+  ) {
+
+    write(
+      KEYS.members,
+      [
+
+        {
+          id: "UO-0001",
+          name: "Chinedu Okafor",
+          phone: "08030000001",
+          village: "Obodo Union",
+          password: "Member@123",
+          active: true,
+          verified: true,
+          createdAt: now()
+        },
+
+        {
+          id: "UO-0002",
+          name: "Emeka Nwosu",
+          phone: "08030000002",
+          village: "Obodo Union",
+          password: "Member@456",
+          active: true,
+          verified: true,
+          createdAt: now()
+        },
+
+        {
+          id: "UM-0001",
+          name: "Ngozi Eze",
+          phone: "08030000003",
+          village: "Umuahia Union",
+          password: "Member@789",
+          active: true,
+          verified: true,
+          createdAt: now()
+        }
+
+      ]
+    );
+
+  }
+
+
+  [
+    KEYS.requests,
+    KEYS.attendance,
+    KEYS.transactions,
+    KEYS.audit
+  ].forEach(key => {
+
+    if (
+      storage.getItem(key) === null
+    ) {
+
+      write(key, []);
+
+    }
+
+  });
 
 }
 
@@ -298,14 +427,22 @@ function fillVillages() {
     "#regVillage"
   ].forEach(selector => {
 
-    const select = $(selector);
+    const element =
+      $(selector);
 
-    select.innerHTML =
-      '<option value="">Select your village</option>' +
+    if (!element) return;
+
+    element.innerHTML =
+      `<option value="">
+        Select village union
+      </option>` +
+
       VILLAGES
         .map(
           village =>
-            `<option>${esc(village)}</option>`
+            `<option value="${esc(village)}">
+              ${esc(village)}
+            </option>`
         )
         .join("");
 
@@ -313,188 +450,71 @@ function fillVillages() {
 
 }
 
-fillVillages();
-
 
 /* =========================================================
-   NAVIGATION
+   AUTH MODAL
 ========================================================= */
 
-$$("[data-login]").forEach(button => {
+function openAuth(
+  mode = "member"
+) {
 
-  button.addEventListener(
-    "click",
-    event => {
+  const modal =
+    $("#authModal");
 
-      if (button.tagName === "A") {
-        event.preventDefault();
-      }
+  if (!modal) return;
 
-      showAuth(
-        button.dataset.login
-      );
+  modal.classList.add("open");
 
-    }
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
   );
 
-});
+  setAuthTab("login");
 
+  if (mode === "admin") {
 
-$$("[data-close-modal]").forEach(button => {
+    $("#loginTitle").textContent =
+      "Administrator access";
 
-  button.addEventListener(
-    "click",
-    () => closeModal(authModal)
-  );
+    $("#loginSubtitle").textContent =
+      "Sign in to manage your village union.";
 
-});
+    $("#loginId").value =
+      ADMIN.id;
 
+  } else {
 
-$$("[data-close-app]").forEach(button => {
+    $("#loginTitle").textContent =
+      "Welcome back";
 
-  button.addEventListener(
-    "click",
-    () => closeModal(appModal)
-  );
-
-});
-
-
-[authModal, appModal].forEach(modal => {
-
-  modal.addEventListener(
-    "click",
-    event => {
-
-      if (event.target === modal) {
-        closeModal(modal);
-      }
-
-    }
-  );
-
-});
-
-
-document.addEventListener(
-  "keydown",
-  event => {
-
-    if (event.key === "Escape") {
-
-      closeModal(authModal);
-
-      closeModal(appModal);
-
-    }
+    $("#loginSubtitle").textContent =
+      "Sign in to your village union account.";
 
   }
-);
+
+}
 
 
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
+function closeAuth() {
 
-$("#mobileMenuButton").addEventListener(
-  "click",
-  () => {
+  const modal =
+    $("#authModal");
 
-    const menu =
-      $("#mobileMenu");
+  if (!modal) return;
 
-    const open =
-      menu.classList.toggle("active");
+  modal.classList.remove("open");
 
-    $("#mobileMenuButton")
-      .setAttribute(
-        "aria-expanded",
-        String(open)
-      );
-
-  }
-);
-
-
-$$(".mobile-menu a").forEach(link => {
-
-  link.addEventListener(
-    "click",
-    () =>
-      $("#mobileMenu")
-        .classList
-        .remove("active")
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
   );
 
-});
+}
 
 
-/* =========================================================
-   SCROLLING
-========================================================= */
-
-$$("[data-scroll]").forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      document
-        .getElementById(
-          button.dataset.scroll
-        )
-        ?.scrollIntoView({
-          behavior: "smooth"
-        });
-
-    }
-  );
-
-});
-
-
-window.addEventListener(
-  "scroll",
-  () => {
-
-    $("#siteHeader")
-      .classList
-      .toggle(
-        "scrolled",
-        window.scrollY > 30
-      );
-
-  }
-);
-
-
-/* =========================================================
-   CHART
-========================================================= */
-
-$("#chartFilter").addEventListener(
-  "change",
-  event => {
-
-    const selected =
-      event.target.options[
-        event.target.selectedIndex
-      ].text;
-
-    toast(
-      "Report period changed",
-      `Dashboard view changed to ${selected}.`
-    );
-
-  }
-);
-
-
-/* =========================================================
-   AUTH TABS
-========================================================= */
-
-function switchAuth(tab) {
+function setAuthTab(tab) {
 
   const login =
     tab === "login";
@@ -505,224 +525,230 @@ function switchAuth(tab) {
   $("#registerPanel").hidden =
     login;
 
-  $$(".auth-tab").forEach(button => {
+  $$("[data-auth-tab]")
+    .forEach(button => {
 
-    button.classList.toggle(
-      "active",
-      button.dataset.authTab === tab
+      button.classList.toggle(
+        "active",
+        button.dataset.authTab === tab
+      );
+
+    });
+
+}
+
+
+function openApp() {
+
+  const modal =
+    $("#appModal");
+
+  if (!modal) return;
+
+  modal.classList.add("open");
+
+  modal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+}
+
+
+function closeApp() {
+
+  const modal =
+    $("#appModal");
+
+  if (!modal) return;
+
+  modal.classList.remove("open");
+
+  modal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function login(event) {
+
+  event.preventDefault();
+
+  const village =
+    $("#loginVillage").value;
+
+  const id =
+    $("#loginId").value.trim();
+
+  const password =
+    $("#loginPassword").value;
+
+
+  /* ADMIN */
+
+  if (
+    id === ADMIN.id &&
+    password === ADMIN.password
+  ) {
+
+    setSession({
+
+      id: ADMIN.id,
+
+      name: ADMIN.name,
+
+      role: "admin",
+
+      village:
+        village || "ALL"
+
+    });
+
+    closeAuth();
+
+    renderAdmin();
+
+    openApp();
+
+    toast(
+      "Welcome",
+      "Administrator portal opened."
     );
+
+    return;
+
+  }
+
+
+  /* MEMBER */
+
+  const members =
+    read(KEYS.members);
+
+  const member =
+    members.find(
+      item =>
+        item.id.toLowerCase() ===
+          id.toLowerCase() &&
+
+        item.password ===
+          password &&
+
+        item.active === true &&
+
+        item.verified === true &&
+
+        (!village ||
+          item.village === village)
+    );
+
+
+  if (!member) {
+
+    toast(
+      "Sign in failed",
+      "Check your village, ID and password.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  setSession({
+
+    id: member.id,
+
+    name: member.name,
+
+    role: "member",
+
+    village: member.village
 
   });
 
-}
 
+  closeAuth();
 
-$$("[data-auth-tab]").forEach(button => {
+  renderMember();
 
-  button.addEventListener(
-    "click",
-    () =>
-      switchAuth(
-        button.dataset.authTab
-      )
+  openApp();
+
+  toast(
+    "Welcome back",
+    `${member.name}, your ${member.village} portal is ready.`
   );
 
-});
-
-
-$("#showRegister").addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    switchAuth("register");
-
-  }
-);
-
-
-$("#showLogin").addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-
-    switchAuth("login");
-
-  }
-);
-
-
-/* =========================================================
-   OPEN LOGIN
-========================================================= */
-
-function showAuth(mode = "member") {
-
-  openModal(authModal);
-
-  switchAuth("login");
-
-  $("#loginTitle").textContent =
-    mode === "admin"
-      ? "Admin Portal"
-      : "Welcome back";
-
-  $("#loginSubtitle").textContent =
-    mode === "admin"
-      ? "Sign in to manage your village union records."
-      : "Sign in to your village union account.";
-
 }
 
 
 /* =========================================================
-   PASSWORD VISIBILITY
+   MEMBER REGISTRATION REQUEST
 ========================================================= */
 
-$("#togglePassword").addEventListener(
-  "click",
-  () => {
+function registerMember(event) {
 
-    const password =
-      $("#loginPassword");
+  event.preventDefault();
 
-    password.type =
-      password.type === "password"
-        ? "text"
-        : "password";
+  const village =
+    $("#regVillage").value;
 
-  }
-);
+  const name =
+    $("#regFullName").value.trim();
+
+  const phone =
+    $("#regPhone").value.trim();
+
+  const memberNo =
+    $("#regMemberNo").value.trim();
+
+  const note =
+    $("#regNote").value.trim();
 
 
-/* =========================================================
-   FORGOT PASSWORD
-========================================================= */
-
-$("#forgotPassword").addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
+  if (
+    !village ||
+    !name ||
+    !phone
+  ) {
 
     toast(
-      "Password recovery",
-      "For production, connect a secure email or phone password-reset flow."
+      "Incomplete request",
+      "Please complete the required fields.",
+      "error"
     );
 
+    return;
+
   }
-);
 
 
-/* =========================================================
-   FIRST-TIME MEMBER REQUEST
-========================================================= */
+  const members =
+    read(KEYS.members);
 
-$("#registerForm").addEventListener(
-  "submit",
-  event => {
-
-    event.preventDefault();
-
-    const village =
-      $("#regVillage").value.trim();
-
-    const name =
-      $("#regFullName").value.trim();
-
-    const phone =
-      $("#regPhone").value.trim();
-
-    const memberNo =
-      $("#regMemberNo").value.trim();
-
-    const note =
-      $("#regNote").value.trim();
+  const existing =
+    members.find(
+      member =>
+        member.village === village &&
+        norm(member.name) === norm(name)
+    );
 
 
-    if (!village || !name || !phone) {
-
-      toast(
-        "Incomplete request",
-        "Village, full name and phone are required.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    const members =
-      read(KEYS.members);
+  if (existing) {
 
     const requests =
       read(KEYS.requests);
 
+    requests.unshift({
 
-    const normalized =
-      name
-        .toLowerCase()
-        .replace(/\s+/g, " ");
-
-
-    const existing =
-      members.find(
-        member =>
-          member.village === village &&
-          member.name
-            .toLowerCase()
-            .replace(/\s+/g, " ") ===
-            normalized
-      );
-
-
-    if (
-      existing &&
-      existing.active
-    ) {
-
-      toast(
-        "Member found",
-        "Your name matches the union register. An administrator must issue or reset your generated credentials.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    const pending =
-      requests.some(
-        request =>
-          request.village === village &&
-          request.name
-            .toLowerCase()
-            .replace(/\s+/g, " ") ===
-            normalized &&
-          request.status === "pending"
-      );
-
-
-    if (pending) {
-
-      toast(
-        "Request already submitted",
-        "Your verification request is already waiting for admin review.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    requests.push({
-
-      id:uid("REQ"),
+      id: uid("REQ"),
 
       village,
 
@@ -734,438 +760,23 @@ $("#registerForm").addEventListener(
 
       note,
 
-      status:"pending",
+      status: "matched",
 
-      createdAt:now()
+      matchedMemberId:
+        existing.id,
+
+      createdAt: now()
 
     });
-
 
     write(
       KEYS.requests,
       requests
     );
 
-
-    $("#registerForm").reset();
-
     toast(
-      "Request submitted",
-      "Admin can now compare your name with the official manual register."
-    );
-
-    switchAuth("login");
-
-  }
-);
-
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-$("#loginForm").addEventListener(
-  "submit",
-  event => {
-
-    event.preventDefault();
-
-
-    const village =
-      $("#loginVillage").value;
-
-    const id =
-      $("#loginId")
-        .value
-        .trim()
-        .toUpperCase();
-
-    const password =
-      $("#loginPassword").value;
-
-
-    if (
-      !village ||
-      !id ||
-      !password
-    ) {
-
-      toast(
-        "Missing information",
-        "Complete all login fields.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    /* DEMO ADMIN */
-
-    if (
-      id === ADMIN.id &&
-      password === ADMIN.password
-    ) {
-
-      closeModal(authModal);
-
-      renderAdmin();
-
-      openModal(appModal);
-
-      return;
-
-    }
-
-
-    /* MEMBER LOGIN */
-
-    const member =
-      read(KEYS.members).find(
-        item =>
-          item.village === village &&
-          item.id.toUpperCase() === id &&
-          item.password === password &&
-          item.verified &&
-          item.active
-      );
-
-
-    if (!member) {
-
-      toast(
-        "Login failed",
-        "Village, login ID or password is incorrect, or your account is not yet verified.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    closeModal(authModal);
-
-    renderMember(member);
-
-    openModal(appModal);
-
-  }
-);
-
-
-/* =========================================================
-   AUDIT TRAIL
-========================================================= */
-
-function addAudit(
-  action,
-  entityId,
-  details,
-  adminName = ADMIN.name
-) {
-
-  const logs =
-    read(KEYS.audit);
-
-  logs.unshift({
-
-    id:uid("AUD"),
-
-    adminName,
-
-    action,
-
-    entityId,
-
-    details,
-
-    createdAt:now()
-
-  });
-
-  write(
-    KEYS.audit,
-    logs
-  );
-
-}
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-function attachLogout() {
-
-  $("#appLogout")
-    ?.addEventListener(
-      "click",
-      () => {
-
-        closeModal(appModal);
-
-        toast(
-          "Signed out",
-          "Your session has ended."
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   MEMBER DASHBOARD
-========================================================= */
-
-function renderMember(member) {
-
-  const transactions =
-    read(KEYS.transactions)
-      .filter(
-        item =>
-          item.memberId === member.id &&
-          item.village === member.village &&
-          item.status === "approved"
-      );
-
-
-  const attendance =
-    read(KEYS.attendance)
-      .filter(
-        item =>
-          item.memberId === member.id &&
-          item.village === member.village &&
-          item.status === "approved"
-      );
-
-
-  const pendingAttendance =
-    read(KEYS.attendance)
-      .filter(
-        item =>
-          item.memberId === member.id &&
-          item.village === member.village &&
-          item.status === "pending"
-      );
-
-
-  const total =
-    transactions.reduce(
-      (sum, item) =>
-        sum + Number(item.amount),
-      0
-    );
-
-
-  $("#appRoot").innerHTML = `
-
-    ${memberHeader(member)}
-
-    <div class="app-body">
-
-      <aside class="app-side">
-
-        <button
-          class="active"
-          data-view="memberDash"
-        >
-          Dashboard
-        </button>
-
-        <button data-view="memberAttendance">
-          Meeting Attendance
-        </button>
-
-        <button data-view="memberContrib">
-          My Contributions
-        </button>
-
-        <button data-view="memberRegister">
-          Village Register
-        </button>
-
-      </aside>
-
-
-      <main
-        class="app-content"
-        id="memberContent"
-      >
-
-        <h2>
-          Welcome,
-          ${esc(member.name.split(" ")[0])}
-        </h2>
-
-        <p class="sub">
-          Your verified union records are shown below.
-        </p>
-
-
-        <div class="app-cards">
-
-          <div class="app-card">
-            <span>Verified Contributions</span>
-            <strong>${money(total)}</strong>
-          </div>
-
-          <div class="app-card">
-            <span>Approved Meetings</span>
-            <strong>${attendance.length}</strong>
-          </div>
-
-          <div class="app-card">
-            <span>Attendance Requests</span>
-            <strong>${pendingAttendance.length}</strong>
-          </div>
-
-        </div>
-
-
-        <div class="app-panel">
-
-          <h3>
-            Mark attendance
-          </h3>
-
-          <div class="app-notice">
-
-            On an official meeting day, mark yourself present here.
-            Your request becomes an official attendance record only
-            after the administrator checks the physical register
-            and approves it.
-
-          </div>
-
-          <button
-            class="btn btn-primary"
-            id="markAttendance"
-          >
-            Mark Present Today
-          </button>
-
-        </div>
-
-      </main>
-
-    </div>
-
-  `;
-
-
-  attachLogout();
-
-  renderMemberViewHandlers(member);
-
-}
-
-
-/* =========================================================
-   MEMBER VIEW NAVIGATION
-========================================================= */
-
-function renderMemberViewHandlers(member) {
-
-  $$(".app-side button").forEach(
-    button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          $$(".app-side button")
-            .forEach(
-              item =>
-                item.classList.remove(
-                  "active"
-                )
-            );
-
-          button.classList.add("active");
-
-
-          const view =
-            button.dataset.view;
-
-
-          if (
-            view ===
-            "memberAttendance"
-          ) {
-
-            memberAttendance(member);
-
-          } else if (
-            view ===
-            "memberContrib"
-          ) {
-
-            memberContrib(member);
-
-          } else if (
-            view ===
-            "memberRegister"
-          ) {
-
-            memberRegister(member);
-
-          } else {
-
-            renderMember(member);
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-  $("#markAttendance")
-    ?.addEventListener(
-      "click",
-      () =>
-        markAttendance(member)
-    );
-
-}
-
-
-/* =========================================================
-   MEMBER ATTENDANCE
-========================================================= */
-
-function markAttendance(member) {
-
-  const list =
-    read(KEYS.attendance);
-
-  const day =
-    new Date()
-      .toISOString()
-      .slice(0,10);
-
-
-  const existing =
-    list.some(
-      item =>
-        item.memberId === member.id &&
-        item.meetingDate === day &&
-        item.status !== "rejected"
-    );
-
-
-  if (existing) {
-
-    toast(
-      "Already submitted",
-      "You already have an attendance record for today.",
-      "error"
+      "Member found",
+      "Your name matches the register. Admin will verify and issue credentials."
     );
 
     return;
@@ -1173,1434 +784,96 @@ function markAttendance(member) {
   }
 
 
-  list.push({
+  const requests =
+    read(KEYS.requests);
 
-    id:uid("ATT"),
+  requests.unshift({
 
-    memberId:member.id,
+    id: uid("REQ"),
 
-    village:member.village,
+    village,
 
-    memberName:member.name,
+    name,
 
-    meetingDate:day,
+    phone,
 
-    status:"pending",
+    memberNo,
 
-    requestedAt:now()
+    note,
+
+    status: "pending",
+
+    createdAt: now()
 
   });
 
-
   write(
-    KEYS.attendance,
-    list
+    KEYS.requests,
+    requests
   );
 
+  event.target.reset();
 
   toast(
-    "Attendance submitted",
-    "Admin must approve it against the manual register."
+    "Request submitted",
+    "Admin will review your membership request."
   );
 
-
-  renderMember(member);
-
-}
-
-
-function memberAttendance(member) {
-
-  const rows =
-    read(KEYS.attendance)
-      .filter(
-        item =>
-          item.memberId === member.id &&
-          item.village === member.village
-      )
-      .sort(
-        (a,b) =>
-          b.meetingDate.localeCompare(
-            a.meetingDate
-          )
-      );
-
-
-  $("#memberContent").innerHTML = `
-
-    <h2>Meeting Attendance</h2>
-
-    <p class="sub">
-      Only admin-approved attendance counts
-      toward your official register.
-    </p>
-
-
-    <div class="app-panel">
-
-      <h3>My attendance history</h3>
-
-      ${
-        rows.length
-
-        ?
-
-        `
-        <table class="data-table">
-
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Approved by</th>
-              <th>Approved at</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            ${rows.map(
-              row => `
-
-              <tr>
-
-                <td>
-                  ${esc(row.meetingDate)}
-                </td>
-
-                <td>
-                  <span
-                    class="badge ${row.status}"
-                  >
-                    ${esc(row.status)}
-                  </span>
-                </td>
-
-                <td>
-                  ${esc(
-                    row.approvedBy || "—"
-                  )}
-                </td>
-
-                <td>
-                  ${
-                    row.approvedAt
-                      ? esc(
-                          fmtDate(
-                            row.approvedAt
-                          )
-                        )
-                      : "—"
-                  }
-                </td>
-
-              </tr>
-
-            `
-            ).join("")}
-
-          </tbody>
-
-        </table>
-        `
-
-        :
-
-        `
-        <div class="empty">
-          No attendance records yet.
-        </div>
-        `
-      }
-
-    </div>
-
-  `;
-
 }
 
 
 /* =========================================================
-   MEMBER CONTRIBUTIONS
+   MEMBER ID / PASSWORD GENERATION
 ========================================================= */
 
-function memberContrib(member) {
-
-  const rows =
-    read(KEYS.transactions)
-      .filter(
-        item =>
-          item.memberId === member.id &&
-          item.village === member.village
-      )
-      .sort(
-        (a,b) =>
-          b.createdAt.localeCompare(
-            a.createdAt
-          )
-      );
-
-
-  $("#memberContent").innerHTML = `
-
-    <h2>My Contributions</h2>
-
-    <p class="sub">
-      Verified contributions are included
-      in official reports.
-    </p>
-
-
-    <div class="app-panel">
-
-      <h3>Contribution history</h3>
-
-      ${
-        rows.length
-
-        ?
-
-        `
-        <table class="data-table">
-
-          <thead>
-
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${rows.map(
-              row => `
-
-              <tr>
-
-                <td>
-                  ${esc(
-                    fmtDate(
-                      row.createdAt
-                    )
-                  )}
-                </td>
-
-                <td>
-                  ${esc(row.type)}
-                </td>
-
-                <td>
-                  ${money(row.amount)}
-                </td>
-
-                <td>
-                  <span
-                    class="badge ${row.status}"
-                  >
-                    ${esc(row.status)}
-                  </span>
-                </td>
-
-              </tr>
-
-            `
-            ).join("")}
-
-          </tbody>
-
-        </table>
-        `
-
-        :
-
-        `
-        <div class="empty">
-          No contribution records yet.
-        </div>
-        `
-      }
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================================================
-   MEMBER REGISTER
-========================================================= */
-
-function memberRegister(member) {
-
-  const rows =
-    read(KEYS.members)
-      .filter(
-        item =>
-          item.village === member.village &&
-          item.active
-      );
-
-
-  $("#memberContent").innerHTML = `
-
-    <h2>Village Register</h2>
-
-    <p class="sub">
-      The register is read-only for members.
-      Personal contact information is intentionally limited.
-    </p>
-
-
-    <div class="app-panel">
-
-      <h3>
-        ${esc(member.village)} members
-      </h3>
-
-
-      <table class="data-table">
-
-        <thead>
-
-          <tr>
-            <th>Member</th>
-            <th>Member ID</th>
-            <th>Meetings Approved</th>
-            <th>Verified Contributions</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          ${rows.map(memberRow => {
-
-            const attendance =
-              read(KEYS.attendance)
-                .filter(
-                  item =>
-                    item.memberId ===
-                      memberRow.id &&
-                    item.status ===
-                      "approved"
-                )
-                .length;
-
-
-            const contribution =
-              read(KEYS.transactions)
-                .filter(
-                  item =>
-                    item.memberId ===
-                      memberRow.id &&
-                    item.status ===
-                      "approved"
-                )
-                .reduce(
-                  (sum,item) =>
-                    sum +
-                    Number(item.amount),
-                  0
-                );
-
-
-            return `
-
-              <tr>
-
-                <td>
-                  ${esc(memberRow.name)}
-                </td>
-
-                <td>
-                  ${esc(memberRow.id)}
-                </td>
-
-                <td>
-                  ${attendance}
-                </td>
-
-                <td>
-                  ${money(contribution)}
-                </td>
-
-              </tr>
-
-            `;
-
-          }).join("")}
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================================================
-   MEMBER HEADER
-========================================================= */
-
-function memberHeader(member) {
-
-  return `
-
-    <div class="app-top">
-
-      <a class="brand" href="#">
-
-        <span class="brand-mark">
-          <i></i><i></i><i></i>
-        </span>
-
-        <span>
-          <strong>
-            Union<span>Ledger</span>
-          </strong>
-
-          <small>
-            Member Portal
-          </small>
-        </span>
-
-      </a>
-
-
-      <div class="app-user">
-
-        ${esc(member.name)}
-        ·
-        ${esc(member.village)}
-
-        <button id="appLogout">
-          Log out
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================================================
-   ADMIN HEADER
-========================================================= */
-
-function adminHeader() {
-
-  return `
-
-    <div class="app-top">
-
-      <a class="brand" href="#">
-
-        <span class="brand-mark">
-          <i></i><i></i><i></i>
-        </span>
-
-        <span>
-          <strong>
-            Union<span>Ledger</span>
-          </strong>
-
-          <small>
-            Admin Portal
-          </small>
-        </span>
-
-      </a>
-
-
-      <div class="app-user">
-
-        Signed in as
-        <strong>
-          ${esc(ADMIN.name)}
-        </strong>
-
-        <button id="appLogout">
-          Log out
-        </button>
-
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-/* =========================================================
-   ADMIN DASHBOARD
-========================================================= */
-
-function renderAdmin() {
+function generatedId(village) {
+
+  const letters =
+    village
+      .replace(/[^A-Za-z]/g, "")
+      .slice(0, 2)
+      .toUpperCase();
 
   const members =
     read(KEYS.members);
 
-  const requests =
-    read(KEYS.requests);
+  let number =
+    members.filter(
+      member =>
+        member.village === village
+    ).length + 1;
 
-  const attendance =
-    read(KEYS.attendance);
+  let id =
+    `${letters}-${String(number).padStart(4, "0")}`;
 
-  const transactions =
-    read(KEYS.transactions);
+  while (
+    members.some(
+      member =>
+        member.id === id
+    )
+  ) {
 
+    number++;
 
-  const pendingRequests =
-    requests.filter(
-      item =>
-        item.status === "pending"
-    );
+    id =
+      `${letters}-${String(number).padStart(4, "0")}`;
 
-  const pendingAttendance =
-    attendance.filter(
-      item =>
-        item.status === "pending"
-    );
+  }
 
-  const pendingTransactions =
-    transactions.filter(
-      item =>
-        item.status === "pending"
-    );
-
-
-  const verifiedTotal =
-    transactions
-      .filter(
-        item =>
-          item.status === "approved"
-      )
-      .reduce(
-        (sum,item) =>
-          sum +
-          Number(item.amount),
-        0
-      );
-
-
-  $("#appRoot").innerHTML = `
-
-    ${adminHeader()}
-
-
-    <div class="app-body">
-
-      <aside class="app-side">
-
-        <button
-          class="active"
-          data-admin-view="overview"
-        >
-          Overview
-        </button>
-
-        <button data-admin-view="requests">
-          Member Requests
-          <b>${pendingRequests.length}</b>
-        </button>
-
-        <button data-admin-view="attendance">
-          Attendance
-          <b>${pendingAttendance.length}</b>
-        </button>
-
-        <button data-admin-view="members">
-          Members
-        </button>
-
-        <button data-admin-view="transactions">
-          Payments
-          <b>${pendingTransactions.length}</b>
-        </button>
-
-        <button data-admin-view="audit">
-          Audit Trail
-        </button>
-
-        <button data-admin-view="reports">
-          Reports
-        </button>
-
-      </aside>
-
-
-      <main
-        class="app-content"
-        id="adminContent"
-      >
-
-        <h2>
-          Admin Dashboard
-        </h2>
-
-        <p class="sub">
-          Village administration and verified financial records.
-        </p>
-
-
-        <div class="app-cards">
-
-          <div class="app-card">
-            <span>Active Members</span>
-            <strong>
-              ${members.filter(
-                member =>
-                  member.active
-              ).length}
-            </strong>
-          </div>
-
-
-          <div class="app-card">
-            <span>
-              Verified Contributions
-            </span>
-
-            <strong>
-              ${money(verifiedTotal)}
-            </strong>
-          </div>
-
-
-          <div class="app-card">
-            <span>
-              Pending Actions
-            </span>
-
-            <strong>
-              ${
-                pendingRequests.length +
-                pendingAttendance.length +
-                pendingTransactions.length
-              }
-            </strong>
-          </div>
-
-        </div>
-
-
-        <div class="app-panel">
-
-          <h3>
-            Administrator rule
-          </h3>
-
-          <div class="app-notice">
-
-            A member's name must be verified against
-            the official union register before login
-            credentials are generated.
-
-            Attendance requests must be checked against
-            the physical register before approval.
-
-          </div>
-
-          <button
-            class="btn btn-primary"
-            data-admin-view="requests"
-          >
-            Review member requests
-          </button>
-
-        </div>
-
-      </main>
-
-    </div>
-
-  `;
-
-
-  attachLogout();
-
-
-  $$("[data-admin-view]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () =>
-          adminView(
-            button.dataset.adminView
-          )
-      );
-
-    });
+  return id;
 
 }
 
 
-/* =========================================================
-   ADMIN VIEWS
-========================================================= */
-
-function adminView(view) {
-
-  $$(".app-side button")
-    .forEach(button => {
-
-      button.classList.toggle(
-        "active",
-        button.dataset.adminView === view
-      );
-
-    });
-
-
-  if (view === "overview") {
-
-    renderAdmin();
-
-    return;
-
-  }
-
-
-  const content =
-    $("#adminContent");
-
-  const members =
-    read(KEYS.members);
-
-  const requests =
-    read(KEYS.requests);
-
-  const attendance =
-    read(KEYS.attendance);
-
-  const transactions =
-    read(KEYS.transactions);
-
-
-  /* MEMBER REQUESTS */
-
-  if (view === "requests") {
-
-    const rows =
-      requests.filter(
-        item =>
-          item.status === "pending"
-      );
-
-
-    content.innerHTML = `
-
-      <h2>
-        Member Verification Requests
-      </h2>
-
-      <p class="sub">
-        Compare each request against the
-        official manual register before approving.
-      </p>
-
-
-      <div class="app-panel">
-
-        ${
-          rows.length
-
-          ?
-
-          `
-          <table class="data-table">
-
-            <thead>
-
-              <tr>
-                <th>Name</th>
-                <th>Village</th>
-                <th>Phone</th>
-                <th>Member No.</th>
-                <th>Requested</th>
-                <th>Action</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              ${rows.map(
-                row => `
-
-                <tr>
-
-                  <td>
-                    ${esc(row.name)}
-                  </td>
-
-                  <td>
-                    ${esc(row.village)}
-                  </td>
-
-                  <td>
-                    ${esc(row.phone)}
-                  </td>
-
-                  <td>
-                    ${esc(row.memberNo || "—")}
-                  </td>
-
-                  <td>
-                    ${esc(fmtDate(row.createdAt))}
-                  </td>
-
-                  <td>
-
-                    <button
-                      class="table-action"
-                      data-verify-request="${row.id}"
-                    >
-                      Verify & Generate ID
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              `
-              ).join("")}
-
-            </tbody>
-
-          </table>
-          `
-
-          :
-
-          `
-          <div class="empty">
-            No pending member requests.
-          </div>
-          `
-        }
-
-      </div>
-
-    `;
-
-
-    $$("[data-verify-request]")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () =>
-            verifyRequest(
-              button.dataset.verifyRequest
-            )
-        );
-
-      });
-
-
-    return;
-
-  }
-
-
-  /* ATTENDANCE */
-
-  if (view === "attendance") {
-
-    const rows =
-      attendance.filter(
-        item =>
-          item.status === "pending"
-      );
-
-
-    content.innerHTML = `
-
-      <h2>
-        Attendance Approval
-      </h2>
-
-      <p class="sub">
-        Check the manual register before approving digital attendance.
-      </p>
-
-
-      <div class="app-panel">
-
-        ${
-          rows.length
-
-          ?
-
-          `
-          <table class="data-table">
-
-            <thead>
-
-              <tr>
-                <th>Member</th>
-                <th>Village</th>
-                <th>Meeting date</th>
-                <th>Requested</th>
-                <th>Action</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              ${rows.map(
-                row => `
-
-                <tr>
-
-                  <td>
-                    ${esc(row.memberName)}
-                  </td>
-
-                  <td>
-                    ${esc(row.village)}
-                  </td>
-
-                  <td>
-                    ${esc(row.meetingDate)}
-                  </td>
-
-                  <td>
-                    ${esc(fmtDate(row.requestedAt))}
-                  </td>
-
-                  <td>
-
-                    <button
-                      class="table-action"
-                      data-approve-att="${row.id}"
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      class="table-action"
-                      data-reject-att="${row.id}"
-                    >
-                      Reject
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              `
-              ).join("")}
-
-            </tbody>
-
-          </table>
-          `
-
-          :
-
-          `
-          <div class="empty">
-            No pending attendance requests.
-          </div>
-          `
-        }
-
-      </div>
-
-    `;
-
-
-    $$("[data-approve-att]")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () =>
-            approveAttendance(
-              button.dataset.approveAtt,
-              true
-            )
-        );
-
-      });
-
-
-    $$("[data-reject-att]")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () =>
-            approveAttendance(
-              button.dataset.rejectAtt,
-              false
-            )
-        );
-
-      });
-
-
-    return;
-
-  }
-
-
-  /* MEMBERS */
-
-  if (view === "members") {
-
-    content.innerHTML = `
-
-      <h2>
-        Village Register
-      </h2>
-
-      <p class="sub">
-        Members can see their village register;
-        admin can manage verified membership.
-      </p>
-
-
-      <div class="app-panel">
-
-        <table class="data-table">
-
-          <thead>
-
-            <tr>
-              <th>Name</th>
-              <th>Village</th>
-              <th>Member ID</th>
-              <th>Attendance</th>
-              <th>Contributions</th>
-              <th>Status</th>
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${members.map(member => {
-
-              const approvedAttendance =
-                attendance.filter(
-                  item =>
-                    item.memberId === member.id &&
-                    item.status === "approved"
-                ).length;
-
-
-              const contributions =
-                transactions
-                  .filter(
-                    item =>
-                      item.memberId === member.id &&
-                      item.status === "approved"
-                  )
-                  .reduce(
-                    (sum,item) =>
-                      sum +
-                      Number(item.amount),
-                    0
-                  );
-
-
-              return `
-
-                <tr>
-
-                  <td>
-                    ${esc(member.name)}
-                  </td>
-
-                  <td>
-                    ${esc(member.village)}
-                  </td>
-
-                  <td>
-                    ${esc(member.id)}
-                  </td>
-
-                  <td>
-                    ${approvedAttendance}
-                  </td>
-
-                  <td>
-                    ${money(contributions)}
-                  </td>
-
-                  <td>
-
-                    <span
-                      class="badge ${
-                        member.active
-                          ? "approved"
-                          : "rejected"
-                      }"
-                    >
-                      ${
-                        member.active
-                          ? "Active"
-                          : "Inactive"
-                      }
-                    </span>
-
-                  </td>
-
-                </tr>
-
-              `;
-
-            }).join("")}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  /* PAYMENTS */
-
-  if (view === "transactions") {
-
-    const rows =
-      transactions.filter(
-        item =>
-          item.status === "pending"
-      );
-
-
-    content.innerHTML = `
-
-      <h2>
-        Payment Verification
-      </h2>
-
-      <p class="sub">
-        Review uploaded proof before adding
-        the payment to verified financial records.
-      </p>
-
-
-      <div class="app-panel">
-
-        ${
-          rows.length
-
-          ?
-
-          `
-          <table class="data-table">
-
-            <thead>
-
-              <tr>
-                <th>Member</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Proof</th>
-                <th>Action</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              ${rows.map(
-                row => `
-
-                <tr>
-
-                  <td>
-                    ${esc(row.memberName)}
-                  </td>
-
-                  <td>
-                    ${esc(row.type)}
-                  </td>
-
-                  <td>
-                    ${money(row.amount)}
-                  </td>
-
-                  <td>
-                    ${esc(
-                      row.proofName ||
-                      "Uploaded proof"
-                    )}
-                  </td>
-
-                  <td>
-
-                    <button
-                      class="table-action"
-                      data-approve-tx="${row.id}"
-                    >
-                      Approve
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              `
-              ).join("")}
-
-            </tbody>
-
-          </table>
-          `
-
-          :
-
-          `
-          <div class="empty">
-            No pending payments.
-          </div>
-          `
-        }
-
-      </div>
-
-    `;
-
-
-    $$("[data-approve-tx]")
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          () =>
-            approveTransaction(
-              button.dataset.approveTx
-            )
-        );
-
-      });
-
-
-    return;
-
-  }
-
-
-  /* AUDIT */
-
-  if (view === "audit") {
-
-    const rows =
-      read(KEYS.audit);
-
-
-    content.innerHTML = `
-
-      <h2>
-        Audit Trail
-      </h2>
-
-      <p class="sub">
-        Every administrative membership and
-        attendance decision is named and timestamped.
-      </p>
-
-
-      <div class="app-panel">
-
-        ${
-          rows.length
-
-          ?
-
-          `
-          <table class="data-table">
-
-            <thead>
-
-              <tr>
-                <th>Time</th>
-                <th>Admin</th>
-                <th>Action</th>
-                <th>Details</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              ${rows.map(
-                row => `
-
-                <tr>
-
-                  <td>
-                    ${esc(fmtDate(row.createdAt))}
-                  </td>
-
-                  <td>
-                    ${esc(row.adminName)}
-                  </td>
-
-                  <td>
-                    ${esc(row.action)}
-                  </td>
-
-                  <td>
-                    ${esc(row.details)}
-                  </td>
-
-                </tr>
-
-              `
-              ).join("")}
-
-            </tbody>
-
-          </table>
-          `
-
-          :
-
-          `
-          <div class="empty">
-            No audit entries yet.
-          </div>
-          `
-        }
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  /* REPORTS */
-
-  if (view === "reports") {
-
-    const approvedTransactions =
-      transactions.filter(
-        item =>
-          item.status === "approved"
-      );
-
-    const approvedAttendance =
-      attendance.filter(
-        item =>
-          item.status === "approved"
-      );
-
-
-    const total =
-      approvedTransactions.reduce(
-        (sum,item) =>
-          sum +
-          Number(item.amount),
-        0
-      );
-
-
-    content.innerHTML = `
-
-      <h2>
-        Annual Reports
-      </h2>
-
-      <p class="sub">
-        Verified records only.
-        Export can be connected to a
-        server-side PDF generator in production.
-      </p>
-
-
-      <div class="app-cards">
-
-        <div class="app-card">
-          <span>
-            Verified Contributions
-          </span>
-
-          <strong>
-            ${money(total)}
-          </strong>
-        </div>
-
-
-        <div class="app-card">
-          <span>
-            Approved Attendances
-          </span>
-
-          <strong>
-            ${approvedAttendance.length}
-          </strong>
-        </div>
-
-
-        <div class="app-card">
-          <span>
-            Active Members
-          </span>
-
-          <strong>
-            ${
-              members.filter(
-                member =>
-                  member.active
-              ).length
-            }
-          </strong>
-        </div>
-
-      </div>
-
-
-      <div class="app-panel">
-
-        <button
-          class="btn btn-primary"
-          id="adminExportReport"
-        >
-          Download Annual Report
-        </button>
-
-      </div>
-
-    `;
-
-
-    $("#adminExportReport")
-      .addEventListener(
-        "click",
-        downloadReport
-      );
-
-  }
+function generatePassword() {
+
+  return (
+    "UL-" +
+    Math.random()
+      .toString(36)
+      .slice(2, 8)
+      .toUpperCase()
+  );
 
 }
 
@@ -2620,71 +893,73 @@ function verifyRequest(id) {
         item.id === id
     );
 
-
-  if (!request) {
-    return;
-  }
+  if (!request) return;
 
 
   const members =
     read(KEYS.members);
 
+  let member =
+    members.find(
+      item =>
+        item.village ===
+          request.village &&
 
-  const prefix =
-    request.village
-      .split(" ")
-      .map(
-        word =>
-          word[0]
-      )
-      .join("")
-      .slice(0,3)
-      .toUpperCase();
+        norm(item.name) ===
+          norm(request.name)
+    );
 
 
-  const count =
-    members.filter(
-      member =>
-        member.village ===
-        request.village
-    ).length + 1;
+  if (member) {
 
+    member.phone =
+      request.phone ||
+      member.phone;
 
-  const memberId =
-    `${prefix}-${String(count).padStart(4,"0")}`;
+    member.active = true;
 
+    member.verified = true;
 
-  const password =
-    `UL-${Math.random()
-      .toString(36)
-      .slice(2,8)
-      .toUpperCase()}`;
+    if (!member.password) {
 
+      member.password =
+        generatePassword();
 
-  const member = {
+    }
 
-    id:memberId,
+  } else {
 
-    password,
+    member = {
 
-    name:request.name,
+      id:
+        generatedId(
+          request.village
+        ),
 
-    phone:request.phone,
+      name:
+        request.name,
 
-    village:request.village,
+      phone:
+        request.phone,
 
-    verified:true,
+      village:
+        request.village,
 
-    active:true,
+      password:
+        generatePassword(),
 
-    attendance:[],
+      active: true,
 
-    createdAt:now()
+      verified: true,
 
-  };
+      createdAt: now()
 
+    };
 
-  members.push(member);
+    members.push(member);
+
+  }
+
 
   write(
     KEYS.members,
@@ -2695,17 +970,11 @@ function verifyRequest(id) {
   request.status =
     "approved";
 
-  request.verifiedAt =
+  request.approvedAt =
     now();
 
-  request.verifiedBy =
+  request.approvedBy =
     ADMIN.name;
-
-  request.generatedMemberId =
-    memberId;
-
-  request.generatedPassword =
-    password;
 
 
   write(
@@ -2714,266 +983,2852 @@ function verifyRequest(id) {
   );
 
 
-  addAudit(
-    "Verified member and generated credentials",
-    memberId,
-    `${request.name} · ${request.village}`
+  audit(
+    "Member verification",
+    "Verified membership and issued credentials",
+    {
+      memberId: member.id,
+      village: member.village
+    }
   );
 
 
-  adminView("requests");
+  renderAdmin();
 
 
   toast(
     "Member verified",
-    `Generated ID ${memberId}. Password: ${password}`
+    `${member.id} / ${member.password}`
   );
 
 }
 
 
 /* =========================================================
-   APPROVE ATTENDANCE
+   REJECT REQUEST
 ========================================================= */
 
-function approveAttendance(
-  id,
-  approved
-) {
+function rejectRequest(id) {
 
-  const list =
-    read(KEYS.attendance);
+  const requests =
+    read(KEYS.requests);
 
-  const record =
-    list.find(
+  const request =
+    requests.find(
       item =>
         item.id === id
     );
 
+  if (!request) return;
 
-  if (!record) {
+
+  request.status =
+    "rejected";
+
+  request.rejectedAt =
+    now();
+
+  request.rejectedBy =
+    ADMIN.name;
+
+
+  write(
+    KEYS.requests,
+    requests
+  );
+
+
+  audit(
+    "Member request rejected",
+    `Rejected request for ${request.name}`,
+    {
+      requestId: id
+    }
+  );
+
+
+  renderAdmin();
+
+
+  toast(
+    "Request rejected",
+    "The verification request was rejected."
+  );
+
+}
+
+
+/* =========================================================
+   PAYMENT SUBMISSION
+========================================================= */
+
+function submitPayment(event) {
+
+  event.preventDefault();
+
+  const session =
+    currentSession();
+
+  if (
+    !session ||
+    session.role !== "member"
+  ) return;
+
+
+  const type =
+    $("#contributionType").value;
+
+  const amount =
+    Number(
+      $("#contributionAmount").value
+    );
+
+  const paymentDate =
+    $("#paymentDate").value;
+
+  const proof =
+    $("#paymentProof").files[0];
+
+
+  if (
+    !type ||
+    !amount ||
+    amount <= 0 ||
+    !paymentDate ||
+    !proof
+  ) {
+
+    toast(
+      "Incomplete payment",
+      "Select a type, amount, date and proof file.",
+      "error"
+    );
+
     return;
+
   }
 
 
-  record.status =
+  const transactions =
+    read(KEYS.transactions);
+
+
+  transactions.unshift({
+
+    id: uid("TX"),
+
+    memberId:
+      session.id,
+
+    memberName:
+      session.name,
+
+    village:
+      session.village,
+
+    type,
+
+    amount,
+
+    paymentDate,
+
+    proofName:
+      proof.name,
+
+    proofSize:
+      proof.size,
+
+    status:
+      "pending",
+
+    submittedAt:
+      now()
+
+  });
+
+
+  write(
+    KEYS.transactions,
+    transactions
+  );
+
+
+  audit(
+    "Payment submitted",
+    `${type} submitted for verification`,
+    {
+      memberId:
+        session.id
+    }
+  );
+
+
+  renderMember();
+
+
+  toast(
+    "Payment submitted",
+    "Admin must verify your proof before the record is counted."
+  );
+
+}
+
+
+/* =========================================================
+   PAYMENT APPROVAL
+========================================================= */
+
+function approveTx(
+  id,
+  approved = true
+) {
+
+  const transactions =
+    read(KEYS.transactions);
+
+  const item =
+    transactions.find(
+      transaction =>
+        transaction.id === id
+    );
+
+  if (!item) return;
+
+
+  item.status =
     approved
-      ? "approved"
+      ? "verified"
       : "rejected";
 
-  record.approvedBy =
+  item.reviewedAt =
+    now();
+
+  item.reviewedBy =
     ADMIN.name;
 
-  record.approvedAt =
-    now();
+
+  write(
+    KEYS.transactions,
+    transactions
+  );
+
+
+  audit(
+    approved
+      ? "Payment verified"
+      : "Payment rejected",
+
+    `${item.type} ${
+      approved
+        ? "verified"
+        : "rejected"
+    } for ${item.memberName}`,
+
+    {
+      transactionId:
+        id,
+
+      memberId:
+        item.memberId
+    }
+  );
+
+
+  renderAdmin();
+
+
+  toast(
+    approved
+      ? "Payment verified"
+      : "Payment rejected",
+
+    `${item.type} for ${item.memberName}.`
+  );
+
+}
+
+
+/* =========================================================
+   ATTENDANCE
+========================================================= */
+
+function markPresent() {
+
+  const session =
+    currentSession();
+
+  if (!session) return;
+
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+
+  const attendance =
+    read(KEYS.attendance);
+
+
+  if (
+    attendance.some(
+      item =>
+        item.memberId ===
+          session.id &&
+        item.date === today
+    )
+  ) {
+
+    toast(
+      "Already submitted",
+      "Attendance for today is already recorded.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  attendance.unshift({
+
+    id:
+      uid("ATT"),
+
+    memberId:
+      session.id,
+
+    memberName:
+      session.name,
+
+    village:
+      session.village,
+
+    date:
+      today,
+
+    status:
+      "pending",
+
+    submittedAt:
+      now()
+
+  });
 
 
   write(
     KEYS.attendance,
-    list
+    attendance
   );
 
 
-  addAudit(
+  toast(
+    "Attendance submitted",
+    "Admin will compare it with the physical register."
+  );
+
+
+  renderMember();
+
+}
+
+
+/* =========================================================
+   ATTENDANCE REVIEW
+========================================================= */
+
+function reviewAttendance(
+  id,
+  approved = true
+) {
+
+  const attendance =
+    read(KEYS.attendance);
+
+  const item =
+    attendance.find(
+      attendanceItem =>
+        attendanceItem.id === id
+    );
+
+  if (!item) return;
+
+
+  item.status =
     approved
-      ? "Approved attendance"
-      : "Rejected attendance",
-    id,
-    `${record.memberName} · ${record.village} · ${record.meetingDate}`
+      ? "approved"
+      : "rejected";
+
+  item.approvedAt =
+    now();
+
+  item.approvedBy =
+    ADMIN.name;
+
+
+  write(
+    KEYS.attendance,
+    attendance
   );
 
 
-  adminView("attendance");
+  audit(
+    approved
+      ? "Attendance approved"
+      : "Attendance rejected",
+
+    `${item.memberName} attendance ${
+      approved
+        ? "approved"
+        : "rejected"
+    }`,
+
+    {
+      attendanceId:
+        id,
+
+      memberId:
+        item.memberId
+    }
+  );
+
+
+  renderAdmin();
 
 
   toast(
     approved
       ? "Attendance approved"
       : "Attendance rejected",
-    approved
-      ? "The verified register now includes this attendance."
-      : "The attendance request was rejected."
+
+    `${item.memberName} — ${dateOnly(item.date)}.`
   );
 
 }
 
 
 /* =========================================================
-   APPROVE PAYMENT
+   REPORT HELPERS
 ========================================================= */
 
-function approveTransaction(id) {
+function verifiedTransactions(
+  village
+) {
 
-  const list =
-    read(KEYS.transactions);
+  return read(
+    KEYS.transactions
+  ).filter(
+    transaction =>
+      transaction.status ===
+        "verified" &&
 
-  const record =
-    list.find(
-      item =>
-        item.id === id
+      (
+        !village ||
+        transaction.village ===
+          village
+      )
+  );
+
+}
+
+
+function totalFor(village) {
+
+  return verifiedTransactions(
+    village
+  ).reduce(
+    (total, transaction) =>
+      total +
+      Number(
+        transaction.amount || 0
+      ),
+    0
+  );
+
+}
+
+
+/* =========================================================
+   PRINT / SAVE AS PDF
+========================================================= */
+
+function reportPdf(
+  village = null,
+  memberId = null
+) {
+
+  const scope =
+    village ||
+    "All Villages";
+
+
+  let transactions =
+    verifiedTransactions(
+      village
     );
 
 
-  if (!record) {
-    return;
-  }
+  if (memberId) {
 
-
-  record.status =
-    "approved";
-
-  record.verifiedBy =
-    ADMIN.name;
-
-  record.verifiedAt =
-    now();
-
-
-  write(
-    KEYS.transactions,
-    list
-  );
-
-
-  addAudit(
-    "Approved payment",
-    id,
-    `${record.memberName} · ${record.type} · ${money(record.amount)}`
-  );
-
-
-  adminView("transactions");
-
-
-  toast(
-    "Payment approved",
-    "The contribution is now included in verified financial records."
-  );
-
-}
-
-
-/* =========================================================
-   REPORT DOWNLOAD DEMO
-========================================================= */
-
-function downloadReport() {
-
-  const transactions =
-    read(KEYS.transactions)
-      .filter(
-        item =>
-          item.status === "approved"
+    transactions =
+      transactions.filter(
+        transaction =>
+          transaction.memberId ===
+          memberId
       );
+
+  }
 
 
   const attendance =
     read(KEYS.attendance)
       .filter(
         item =>
-          item.status === "approved"
-      );
+          (
+            !village ||
+            item.village === village
+          ) &&
 
+          (
+            !memberId ||
+            item.memberId === memberId
+          ) &&
 
-  const members =
-    read(KEYS.members)
-      .filter(
-        item =>
-          item.active
+          item.status ===
+            "approved"
       );
 
 
   const total =
     transactions.reduce(
-      (sum,item) =>
+      (sum, transaction) =>
         sum +
-        Number(item.amount),
+        Number(
+          transaction.amount || 0
+        ),
       0
     );
 
 
-  const report = `
-
-UNIONLEDGER
-ANNUAL UNION REPORT
-
-Generated:
-${new Date().toLocaleString("en-NG")}
-
-Active members:
-${members.length}
-
-Verified contributions:
-${money(total)}
-
-Approved meeting attendances:
-${attendance.length}
-
-This report contains verified records only.
-
-`;
-
-
-  const blob =
-    new Blob(
-      [report],
-      {
-        type:
-          "text/plain"
-      }
+  const windowReference =
+    window.open(
+      "",
+      "_blank",
+      "width=900,height=700"
     );
 
 
-  const url =
-    URL.createObjectURL(blob);
+  if (!windowReference) {
+
+    toast(
+      "Popup blocked",
+      "Allow popups to generate the printable PDF report.",
+      "error"
+    );
+
+    return;
+
+  }
 
 
-  const link =
-    document.createElement("a");
+  windowReference.document.write(`
+
+    <!doctype html>
+
+    <html>
+
+    <head>
+
+      <title>
+        UnionLedger Financial Report
+      </title>
+
+      <style>
+
+        body{
+          font-family:Arial,sans-serif;
+          padding:40px;
+          color:#071711;
+        }
+
+        h1{
+          color:#8b6f2d;
+        }
+
+        table{
+          border-collapse:collapse;
+          width:100%;
+          margin-top:25px;
+        }
+
+        th,
+        td{
+          border:1px solid #ddd;
+          padding:10px;
+          text-align:left;
+        }
+
+        button{
+          margin-top:25px;
+          padding:12px 18px;
+        }
+
+        @media print{
+          button{
+            display:none;
+          }
+        }
+
+      </style>
+
+    </head>
 
 
-  link.href = url;
+    <body>
 
-  link.download =
-    "unionledger-annual-report.txt";
+      <h1>UNIONLEDGER</h1>
+
+      <h2>
+        Community Financial Report
+      </h2>
+
+      <p>
+        ${esc(scope)}
+      </p>
+
+      <p>
+        Generated:
+        ${esc(dateTime(now()))}
+      </p>
 
 
-  link.click();
+      <table>
+
+        <tr>
+          <th>
+            Contribution Type
+          </th>
+
+          <th>
+            Verified Amount
+          </th>
+        </tr>
 
 
-  URL.revokeObjectURL(url);
+        ${TYPES.map(type => `
+
+          <tr>
+
+            <td>
+              ${esc(type)}
+            </td>
+
+            <td>
+              ${money(
+                transactions
+                  .filter(
+                    item =>
+                      item.type === type
+                  )
+                  .reduce(
+                    (sum,item) =>
+                      sum +
+                      Number(
+                        item.amount || 0
+                      ),
+                    0
+                  )
+              )}
+            </td>
+
+          </tr>
+
+        `).join("")}
 
 
-  toast(
-    "Report downloaded",
-    "Demo export created. Production should generate a real PDF server-side."
+        <tr>
+
+          <th>
+            Total
+          </th>
+
+          <th>
+            ${money(total)}
+          </th>
+
+        </tr>
+
+      </table>
+
+
+      <p>
+        Approved attendance records:
+        ${attendance.length}
+      </p>
+
+
+      <button
+        onclick="window.print()"
+      >
+        Print / Save as PDF
+      </button>
+
+
+    </body>
+
+    </html>
+
+  `);
+
+
+  windowReference.document.close();
+
+  windowReference.focus();
+
+
+  setTimeout(
+    () => windowReference.print(),
+    350
   );
 
 }
 
 
 /* =========================================================
-   LANDING PAGE REPORT
+   MEMBER DASHBOARD
 ========================================================= */
 
-$("#demoReportBtn")
-  .addEventListener(
-    "click",
-    downloadReport
+function renderMember() {
+
+  const session =
+    currentSession();
+
+  const transactions =
+    read(KEYS.transactions)
+      .filter(
+        item =>
+          item.memberId ===
+          session.id
+      );
+
+  const attendance =
+    read(KEYS.attendance)
+      .filter(
+        item =>
+          item.memberId ===
+          session.id
+      );
+
+  const verified =
+    transactions.filter(
+      item =>
+        item.status ===
+        "verified"
+    );
+
+
+  $("#appRoot").innerHTML = `
+
+    <div class="app-shell">
+
+
+      <div class="app-top">
+
+        <div>
+
+          <span class="eyebrow">
+            Member Portal
+          </span>
+
+          <h2>
+            ${esc(session.name)}
+          </h2>
+
+          <p>
+            ${esc(session.village)}
+            ·
+            ${esc(session.id)}
+          </p>
+
+        </div>
+
+
+        <button
+          class="btn btn-ghost"
+          data-action="logout"
+        >
+          Sign out
+        </button>
+
+      </div>
+
+
+      <div class="app-tabs">
+
+        <button
+          class="app-tab active"
+          data-app-tab="overview"
+        >
+          Overview
+        </button>
+
+        <button
+          class="app-tab"
+          data-app-tab="payments"
+        >
+          Submit Payment
+        </button>
+
+        <button
+          class="app-tab"
+          data-app-tab="attendance"
+        >
+          Attendance
+        </button>
+
+        <button
+          class="app-tab"
+          data-app-tab="records"
+        >
+          My Records
+        </button>
+
+      </div>
+
+
+      <div id="memberView"></div>
+
+
+    </div>
+
+  `;
+
+
+  renderMemberView(
+    "overview"
   );
+
+}
 
 
 /* =========================================================
-   STARTUP
+   MEMBER VIEW
 ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+function renderMemberView(tab) {
 
-    console.log(
-      "UnionLedger initialized without JavaScript errors."
+  const session =
+    currentSession();
+
+  const transactions =
+    read(KEYS.transactions)
+      .filter(
+        item =>
+          item.memberId ===
+          session.id
+      );
+
+  const attendance =
+    read(KEYS.attendance)
+      .filter(
+        item =>
+          item.memberId ===
+          session.id
+      );
+
+
+  const verified =
+    transactions.filter(
+      item =>
+        item.status ===
+        "verified"
+    );
+
+
+  const verifiedTotal =
+    verified.reduce(
+      (sum,item) =>
+        sum +
+        Number(
+          item.amount || 0
+        ),
+      0
+    );
+
+
+  const root =
+    $("#memberView");
+
+  if (!root) return;
+
+
+  if (
+    tab ===
+    "overview"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="stat-grid">
+
+        <div class="app-stat">
+
+          <span>
+            Verified contributions
+          </span>
+
+          <strong>
+            ${money(verifiedTotal)}
+          </strong>
+
+        </div>
+
+
+        <div class="app-stat">
+
+          <span>
+            Approved attendance
+          </span>
+
+          <strong>
+            ${
+              attendance.filter(
+                item =>
+                  item.status ===
+                  "approved"
+              ).length
+            }
+          </strong>
+
+        </div>
+
+
+        <div class="app-stat">
+
+          <span>
+            Pending payments
+          </span>
+
+          <strong>
+            ${
+              transactions.filter(
+                item =>
+                  item.status ===
+                  "pending"
+              ).length
+            }
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Quick actions
+            </h3>
+
+            <p>
+              Keep your union records current.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="action-grid">
+
+          <button
+            class="action-btn"
+            data-app-tab="payments"
+          >
+            ＋ Submit payment proof
+          </button>
+
+          <button
+            class="action-btn"
+            data-action="mark-attendance"
+          >
+            ✓ Mark present today
+          </button>
+
+          <button
+            class="action-btn"
+            data-app-tab="attendance"
+          >
+            ◷ View attendance
+          </button>
+
+          <button
+            class="action-btn"
+            data-action="member-report"
+          >
+            ▣ Download statement
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if (
+    tab ===
+    "payments"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Submit payment proof
+            </h3>
+
+            <p>
+              Your payment becomes an official contribution
+              only after admin verification.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <form
+          id="paymentForm"
+          class="app-form"
+        >
+
+          <label>
+
+            Contribution type
+
+            <select
+              id="contributionType"
+              required
+            >
+
+              <option value="">
+                Select type
+              </option>
+
+              ${TYPES.map(
+                type =>
+                  `<option>
+                    ${esc(type)}
+                  </option>`
+              ).join("")}
+
+            </select>
+
+          </label>
+
+
+          <label>
+
+            Amount (₦)
+
+            <input
+              id="contributionAmount"
+              type="number"
+              min="1"
+              step="0.01"
+              required
+            >
+
+          </label>
+
+
+          <label>
+
+            Payment date
+
+            <input
+              id="paymentDate"
+              type="date"
+              required
+            >
+
+          </label>
+
+
+          <label>
+
+            Proof of payment
+
+            <input
+              id="paymentProof"
+              type="file"
+              accept="image/*,.pdf"
+              required
+            >
+
+          </label>
+
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+          >
+            Submit for verification
+          </button>
+
+        </form>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if (
+    tab ===
+    "attendance"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Meeting attendance
+            </h3>
+
+            <p>
+              Admin approval is required after checking
+              the physical register.
+            </p>
+
+          </div>
+
+
+          <button
+            class="btn btn-primary"
+            data-action="mark-attendance"
+          >
+            Mark Present Today
+          </button>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Reviewed by</th>
+                <th>Time</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                attendance.length
+
+                  ? attendance
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${dateOnly(item.date)}
+                            </td>
+
+                            <td>
+                              <span class="badge ${item.status}">
+                                ${esc(item.status)}
+                              </span>
+                            </td>
+
+                            <td>
+                              ${esc(item.approvedBy || "—")}
+                            </td>
+
+                            <td>
+                              ${
+                                item.approvedAt
+                                  ? dateTime(item.approvedAt)
+                                  : "—"
+                              }
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="4">
+                          No attendance submitted yet.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  if (
+    tab ===
+    "records"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              My contribution records
+            </h3>
+
+            <p>
+              Only verified payments are included
+              in official financial reports.
+            </p>
+
+          </div>
+
+
+          <button
+            class="btn btn-outline"
+            data-action="member-report"
+          >
+            Download statement
+          </button>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Proof</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                transactions.length
+
+                  ? transactions
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${dateOnly(item.paymentDate)}
+                            </td>
+
+                            <td>
+                              ${esc(item.type)}
+                            </td>
+
+                            <td>
+                              ${money(item.amount)}
+                            </td>
+
+                            <td>
+                              <span class="badge ${item.status}">
+                                ${esc(item.status)}
+                              </span>
+                            </td>
+
+                            <td>
+                              ${esc(item.proofName || "—")}
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="5">
+                          No payment records yet.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
+
+function renderAdmin() {
+
+  const requests =
+    read(KEYS.requests)
+      .filter(
+        item =>
+          item.status === "pending" ||
+          item.status === "matched"
+      );
+
+  const pendingPayments =
+    read(KEYS.transactions)
+      .filter(
+        item =>
+          item.status === "pending"
+      );
+
+  const pendingAttendance =
+    read(KEYS.attendance)
+      .filter(
+        item =>
+          item.status === "pending"
+      );
+
+  const members =
+    read(KEYS.members);
+
+
+  $("#appRoot").innerHTML = `
+
+    <div class="app-shell">
+
+
+      <div class="app-top">
+
+        <div>
+
+          <span class="eyebrow">
+            Administrator Portal
+          </span>
+
+          <h2>
+            ${esc(ADMIN.name)}
+          </h2>
+
+          <p>
+            Multi-village oversight ·
+            10 tenant spaces
+          </p>
+
+        </div>
+
+
+        <button
+          class="btn btn-ghost"
+          data-action="logout"
+        >
+          Sign out
+        </button>
+
+      </div>
+
+
+      <div class="admin-summary">
+
+        <div class="app-stat">
+
+          <span>
+            Total verified collections
+          </span>
+
+          <strong>
+            ${money(totalFor())}
+          </strong>
+
+        </div>
+
+
+        <div class="app-stat">
+
+          <span>
+            Members
+          </span>
+
+          <strong>
+            ${members.length}
+          </strong>
+
+        </div>
+
+
+        <div class="app-stat">
+
+          <span>
+            Pending payments
+          </span>
+
+          <strong>
+            ${pendingPayments.length}
+          </strong>
+
+        </div>
+
+
+        <div class="app-stat">
+
+          <span>
+            Pending attendance
+          </span>
+
+          <strong>
+            ${pendingAttendance.length}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="app-tabs">
+
+        <button
+          class="app-tab active"
+          data-admin-tab="requests"
+        >
+          Member Requests (${requests.length})
+        </button>
+
+        <button
+          class="app-tab"
+          data-admin-tab="payments"
+        >
+          Payments (${pendingPayments.length})
+        </button>
+
+        <button
+          class="app-tab"
+          data-admin-tab="attendance"
+        >
+          Attendance (${pendingAttendance.length})
+        </button>
+
+        <button
+          class="app-tab"
+          data-admin-tab="register"
+        >
+          Register
+        </button>
+
+        <button
+          class="app-tab"
+          data-admin-tab="audit"
+        >
+          Audit
+        </button>
+
+        <button
+          class="app-tab"
+          data-admin-tab="reports"
+        >
+          Reports
+        </button>
+
+      </div>
+
+
+      <div id="adminView"></div>
+
+    </div>
+
+  `;
+
+
+  renderAdminView(
+    "requests"
+  );
+
+}
+
+
+/* =========================================================
+   ADMIN VIEWS
+========================================================= */
+
+function renderAdminView(tab) {
+
+  const root =
+    $("#adminView");
+
+  if (!root) return;
+
+
+  const requests =
+    read(KEYS.requests);
+
+  const transactions =
+    read(KEYS.transactions);
+
+  const attendance =
+    read(KEYS.attendance);
+
+  const members =
+    read(KEYS.members);
+
+  const auditRows =
+    read(KEYS.audit);
+
+
+  /* MEMBER REQUESTS */
+
+  if (
+    tab ===
+    "requests"
+  ) {
+
+    const pending =
+      requests.filter(
+        item =>
+          item.status === "pending" ||
+          item.status === "matched"
+      );
+
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Member verification requests
+            </h3>
+
+            <p>
+              Match each request against
+              the physical union register.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Name</th>
+                <th>Village</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                pending.length
+
+                  ? pending
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${esc(item.name)}
+                            </td>
+
+                            <td>
+                              ${esc(item.village)}
+                            </td>
+
+                            <td>
+                              ${esc(item.phone)}
+                            </td>
+
+                            <td>
+                              <span class="badge pending">
+                                ${esc(item.status)}
+                              </span>
+                            </td>
+
+                            <td>
+
+                              <button
+                                class="mini-btn"
+                                data-action="verify-request"
+                                data-id="${item.id}"
+                              >
+                                Verify & Generate ID
+                              </button>
+
+                              <button
+                                class="mini-btn danger"
+                                data-action="reject-request"
+                                data-id="${item.id}"
+                              >
+                                Reject
+                              </button>
+
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="5">
+                          No pending member requests.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* PAYMENTS */
+
+  if (
+    tab ===
+    "payments"
+  ) {
+
+    const pending =
+      transactions.filter(
+        item =>
+          item.status ===
+          "pending"
+      );
+
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Payment verification
+            </h3>
+
+            <p>
+              Review proof before counting
+              money in official records.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Member</th>
+                <th>Village</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Proof</th>
+                <th>Action</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                pending.length
+
+                  ? pending
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${esc(item.memberName)}
+                            </td>
+
+                            <td>
+                              ${esc(item.village)}
+                            </td>
+
+                            <td>
+                              ${esc(item.type)}
+                            </td>
+
+                            <td>
+                              ${money(item.amount)}
+                            </td>
+
+                            <td>
+                              ${esc(item.proofName)}
+                            </td>
+
+                            <td>
+
+                              <button
+                                class="mini-btn"
+                                data-action="approve-tx"
+                                data-id="${item.id}"
+                              >
+                                Approve
+                              </button>
+
+                              <button
+                                class="mini-btn danger"
+                                data-action="reject-tx"
+                                data-id="${item.id}"
+                              >
+                                Reject
+                              </button>
+
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="6">
+                          No pending payments.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* ATTENDANCE */
+
+  if (
+    tab ===
+    "attendance"
+  ) {
+
+    const pending =
+      attendance.filter(
+        item =>
+          item.status ===
+          "pending"
+      );
+
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Meeting attendance approval
+            </h3>
+
+            <p>
+              Compare with the manual register
+              before approval.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Member</th>
+                <th>Village</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                pending.length
+
+                  ? pending
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${esc(item.memberName)}
+                            </td>
+
+                            <td>
+                              ${esc(item.village)}
+                            </td>
+
+                            <td>
+                              ${dateOnly(item.date)}
+                            </td>
+
+                            <td>
+
+                              <button
+                                class="mini-btn"
+                                data-action="approve-att"
+                                data-id="${item.id}"
+                              >
+                                Approve
+                              </button>
+
+                              <button
+                                class="mini-btn danger"
+                                data-action="reject-att"
+                                data-id="${item.id}"
+                              >
+                                Reject
+                              </button>
+
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="4">
+                          No pending attendance.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* REGISTER */
+
+  if (
+    tab ===
+    "register"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Village member register
+            </h3>
+
+            <p>
+              Attendance and verified contribution
+              totals by member.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Member</th>
+                <th>Village</th>
+                <th>ID</th>
+                <th>Attendance</th>
+                <th>Verified contributions</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${members
+                .map(
+                  member => `
+
+                    <tr>
+
+                      <td>
+                        ${esc(member.name)}
+                      </td>
+
+                      <td>
+                        ${esc(member.village)}
+                      </td>
+
+                      <td>
+                        ${esc(member.id)}
+                      </td>
+
+                      <td>
+                        ${
+                          attendance.filter(
+                            item =>
+                              item.memberId ===
+                                member.id &&
+                              item.status ===
+                                "approved"
+                          ).length
+                        }
+                      </td>
+
+                      <td>
+                        ${money(
+                          transactions
+                            .filter(
+                              item =>
+                                item.memberId ===
+                                  member.id &&
+                                item.status ===
+                                  "verified"
+                            )
+                            .reduce(
+                              (sum,item) =>
+                                sum +
+                                Number(
+                                  item.amount ||
+                                  0
+                                ),
+                              0
+                            )
+                        )}
+                      </td>
+
+                    </tr>
+
+                  `
+                )
+                .join("")}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* AUDIT */
+
+  if (
+    tab ===
+    "audit"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Administrative audit trail
+            </h3>
+
+            <p>
+              Every administrative action is
+              named and timestamped.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+                <th>Time</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Detail</th>
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${
+                auditRows.length
+
+                  ? auditRows
+                      .slice(0,100)
+                      .map(
+                        item => `
+
+                          <tr>
+
+                            <td>
+                              ${dateTime(item.at)}
+                            </td>
+
+                            <td>
+                              ${esc(item.adminName)}
+                            </td>
+
+                            <td>
+                              ${esc(item.action)}
+                            </td>
+
+                            <td>
+                              ${esc(item.detail)}
+                            </td>
+
+                          </tr>
+
+                        `
+                      )
+                      .join("")
+
+                  : `
+
+                      <tr>
+
+                        <td colspan="4">
+                          No audit events yet.
+                        </td>
+
+                      </tr>
+
+                    `
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  /* REPORTS */
+
+  if (
+    tab ===
+    "reports"
+  ) {
+
+    root.innerHTML = `
+
+      <div class="app-card">
+
+        <div class="card-head">
+
+          <div>
+
+            <h3>
+              Financial reports
+            </h3>
+
+            <p>
+              Generate a print-ready report and
+              choose “Save as PDF”.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="report-actions">
+
+          <button
+            class="btn btn-primary"
+            data-action="all-report"
+          >
+            Annual / all-village report
+          </button>
+
+
+          ${VILLAGES.map(
+            village => `
+
+              <button
+                class="action-btn"
+                data-report-village="${esc(village)}"
+              >
+                ${esc(village)}
+              </button>
+
+            `
+          ).join("")}
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================================================
+   CENTRAL EVENT DELEGATION
+   ========================================================= */
+
+function delegateClick(event) {
+
+  const loginButton =
+    event.target.closest(
+      "[data-login]"
+    );
+
+  if (loginButton) {
+
+    event.preventDefault();
+
+    openAuth(
+      loginButton.dataset.login
+    );
+
+    return;
+
+  }
+
+
+  const scrollButton =
+    event.target.closest(
+      "[data-scroll]"
+    );
+
+  if (scrollButton) {
+
+    event.preventDefault();
+
+    const section =
+      $(
+        `#${scrollButton.dataset.scroll}`
+      );
+
+    if (section) {
+
+      section.scrollIntoView({
+        behavior:"smooth"
+      });
+
+    }
+
+    return;
+
+  }
+
+
+  const closeAuthButton =
+    event.target.closest(
+      "[data-close-modal]"
+    );
+
+  if (closeAuthButton) {
+
+    closeAuth();
+
+    return;
+
+  }
+
+
+  const closeAppButton =
+    event.target.closest(
+      "[data-close-app]"
+    );
+
+  if (closeAppButton) {
+
+    closeApp();
+
+    return;
+
+  }
+
+
+  const authTab =
+    event.target.closest(
+      "[data-auth-tab]"
+    );
+
+  if (authTab) {
+
+    setAuthTab(
+      authTab.dataset.authTab
+    );
+
+    return;
+
+  }
+
+
+  const memberTab =
+    event.target.closest(
+      "[data-app-tab]"
+    );
+
+  if (
+    memberTab &&
+    currentSession()?.role ===
+      "member"
+  ) {
+
+    $$("[data-app-tab]")
+      .forEach(button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.appTab ===
+            memberTab.dataset.appTab
+        );
+
+      });
+
+
+    renderMemberView(
+      memberTab.dataset.appTab
+    );
+
+    return;
+
+  }
+
+
+  const adminTab =
+    event.target.closest(
+      "[data-admin-tab]"
+    );
+
+  if (
+    adminTab &&
+    currentSession()?.role ===
+      "admin"
+  ) {
+
+    $$("[data-admin-tab]")
+      .forEach(button => {
+
+        button.classList.toggle(
+          "active",
+          button.dataset.adminTab ===
+            adminTab.dataset.adminTab
+        );
+
+      });
+
+
+    renderAdminView(
+      adminTab.dataset.adminTab
+    );
+
+    return;
+
+  }
+
+
+  const actionButton =
+    event.target.closest(
+      "[data-action]"
+    );
+
+  if (actionButton) {
+
+    const action =
+      actionButton.dataset.action;
+
+    const id =
+      actionButton.dataset.id;
+
+
+    if (
+      action ===
+      "logout"
+    ) {
+
+      setSession(null);
+
+      closeApp();
+
+      toast(
+        "Signed out",
+        "Your session has ended."
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "mark-attendance"
+    ) {
+
+      markPresent();
+
+    }
+
+
+    else if (
+      action ===
+      "verify-request"
+    ) {
+
+      verifyRequest(id);
+
+    }
+
+
+    else if (
+      action ===
+      "reject-request"
+    ) {
+
+      rejectRequest(id);
+
+    }
+
+
+    else if (
+      action ===
+      "approve-tx"
+    ) {
+
+      approveTx(
+        id,
+        true
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "reject-tx"
+    ) {
+
+      approveTx(
+        id,
+        false
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "approve-att"
+    ) {
+
+      reviewAttendance(
+        id,
+        true
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "reject-att"
+    ) {
+
+      reviewAttendance(
+        id,
+        false
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "member-report"
+    ) {
+
+      const session =
+        currentSession();
+
+      reportPdf(
+        session.village,
+        session.id
+      );
+
+    }
+
+
+    else if (
+      action ===
+      "all-report"
+    ) {
+
+      reportPdf();
+
+    }
+
+
+    return;
+
+  }
+
+
+  const villageReport =
+    event.target.closest(
+      "[data-report-village]"
+    );
+
+  if (villageReport) {
+
+    reportPdf(
+      villageReport.dataset.reportVillage
     );
 
   }
-);
+
+}
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+function init() {
+
+  seed();
+
+  fillVillages();
+
+
+  /*
+    ONE click listener for the whole application.
+
+    This is especially important inside sandboxed builders.
+  */
+
+  document.addEventListener(
+    "click",
+    delegateClick
+  );
+
+
+  /*
+    Static forms.
+  */
+
+  $("#loginForm")
+    ?.addEventListener(
+      "submit",
+      login
+    );
+
+
+  $("#registerForm")
+    ?.addEventListener(
+      "submit",
+      registerMember
+    );
+
+
+  /*
+    Dynamic payment form.
+
+    It does not exist when the page first loads,
+    therefore submit is delegated from document.
+  */
+
+  document.addEventListener(
+    "submit",
+    event => {
+
+      if (
+        event.target &&
+        event.target.id ===
+          "paymentForm"
+      ) {
+
+        submitPayment(event);
+
+      }
+
+    }
+  );
+
+
+  /* PASSWORD TOGGLE */
+
+  $("#togglePassword")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        const password =
+          $("#loginPassword");
+
+        if (!password) return;
+
+        password.type =
+          password.type ===
+            "password"
+            ? "text"
+            : "password";
+
+      }
+    );
+
+
+  /* REGISTER / LOGIN LINKS */
+
+  $("#showRegister")
+    ?.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        setAuthTab(
+          "register"
+        );
+
+      }
+    );
+
+
+  $("#showLogin")
+    ?.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        setAuthTab(
+          "login"
+        );
+
+      }
+    );
+
+
+  /* FORGOT PASSWORD */
+
+  $("#forgotPassword")
+    ?.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+
+        toast(
+          "Password reset",
+          "For this demo, contact your union administrator to issue a new credential."
+        );
+
+      }
+    );
+
+
+  /* MOBILE MENU */
+
+  $("#mobileMenuButton")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        const menu =
+          $("#mobileMenu");
+
+        const button =
+          $("#mobileMenuButton");
+
+        if (!menu || !button)
+          return;
+
+        const open =
+          menu.classList.toggle(
+            "open"
+          );
+
+        button.setAttribute(
+          "aria-expanded",
+          String(open)
+        );
+
+      }
+    );
+
+
+  /* LANDING PAGE PDF BUTTON */
+
+  $("#demoReportBtn")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        reportPdf(
+          "Obodo Union"
+        );
+
+      }
+    );
+
+
+  /* CHART FILTER */
+
+  $("#chartFilter")
+    ?.addEventListener(
+      "change",
+      event => {
+
+        const option =
+          event.target
+            .options[
+              event.target
+                .selectedIndex
+            ];
+
+        toast(
+          "Chart updated",
+          `Showing ${option.text}.`
+        );
+
+      }
+    );
+
+
+  /* HEADER SCROLL EFFECT */
+
+  window.addEventListener(
+    "scroll",
+    () => {
+
+      $("#siteHeader")
+        ?.classList.toggle(
+          "scrolled",
+          window.scrollY > 20
+        );
+
+    }
+  );
+
+
+  /* CLOSE MODALS BY CLICKING BACKDROP */
+
+  $("#authModal")
+    ?.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target.id ===
+          "authModal"
+        ) {
+
+          closeAuth();
+
+        }
+
+      }
+    );
+
+
+  $("#appModal")
+    ?.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target.id ===
+          "appModal"
+        ) {
+
+          closeApp();
+
+        }
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+if (
+  document.readyState ===
+  "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
+
+} else {
+
+  init();
+
+}
