@@ -1,4 +1,4 @@
-```javascript
+
 /* =========================================================
    UNIONLEDGER — FUNCTIONAL FRONTEND PROTOTYPE
 ========================================================= */
@@ -2977,4 +2977,3 @@ document.addEventListener(
 
   }
 );
-```
