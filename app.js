@@ -1,15 +1,15 @@
-/* UMUNNA VAULT V2 - 100% Error Free */
+/* UMUNNA VAULT V2.1 - FIXED PROOF VIEW + ALL DROPDOWNS */
 const VILLAGES = ["Umueze","Umuogbo","Umudim","Umunkwo","Umuokpara","Umuezeala","Umuezi","Umudioka","Umuobom","Umuelem"];
 const LEVIES = ["Annual Dues","Burial Levy","Life Insurance Levy","Party Donation","Support Levy"];
 const LS_KEY = "umunna_vault_v2_final";
-let state = { village:null, user:null, file:null };
+let state = { village:null, user:null, file:null, fileData:null, fileType:null };
 
 function dbGet(){
   let d = JSON.parse(localStorage.getItem(LS_KEY));
   if(!d){
     d={}; VILLAGES.forEach(v=>{
       const members = Array.from({length:10},(_,i)=>({id:`${v.slice(0,2).toUpperCase()}-${String(i+1).padStart(3,'0')}`, name:["Emeka Okoro","Obinna Uche","Ifeoma Eze","Kelechi Nwosu","Amara Madu","Chidi Anya","Ugochi Okafor","Tochi Ugwu","Zara Nnanna","Nnamdi Okoro"][i]+" • "+v, pass:`${v.toLowerCase()}2024`}));
-      d[v]={ members, admin:{id:`ADMIN-${v.slice(0,2).toUpperCase()}`, name:`Admin ${v} Okonkwo`, pass:`admin${v.slice(0,2).toLowerCase()}`}, transactions:[], proofs:[], audits:[] };
+      d[v]={ members, admin:{id:`ADMIN-${v.slice(0,2).toUpperCase()}`, name:`Admin ${v} Okonkwo`, pass:`admin${v.toLowerCase()}`}, transactions:[], proofs:[], audits:[] };
       LEVIES.forEach(lev=>{
         for(let j=0;j<4;j++){
           const mem = members[j];
@@ -24,7 +24,6 @@ function dbGet(){
 }
 function dbSave(d){ localStorage.setItem(LS_KEY, JSON.stringify(d)); }
 
-// INIT LANDING
 const sel = document.getElementById('villageSelect');
 sel.innerHTML = VILLAGES.map(v=>`<option value="${v}">${v} Village Union</option>`).join('');
 document.getElementById('villageStrip').innerHTML = VILLAGES.map(v=>`<div class="v-pill">🔒 ${v} • Isolated Vault</div>`).join('');
@@ -32,15 +31,25 @@ document.getElementById('previewList').innerHTML = LEVIES.map(l=>`<div class="v-
 function refreshDemo(){ const v=sel.value; const data=dbGet()[v]; document.getElementById('demoBox').innerText = `DEMO LOGIN FOR ${v.toUpperCase()}:\nMember: ${data.members[0].id} / ${data.members[0].pass}\nAdmin: ${data.admin.id} / ${data.admin.pass}`; }
 sel.addEventListener('change', refreshDemo); refreshDemo();
 
-// MODALS
 function openLogin(role){ document.getElementById('loginModal').classList.remove('hidden'); document.getElementById('loginHead').innerText = role==='admin'? 'Admin Portal Access' : 'Member Vault Access'; refreshDemo(); }
 function closeLogin(){ document.getElementById('loginModal').classList.add('hidden'); }
 function openProof(){ document.getElementById('proofModal').classList.remove('hidden'); }
 function closeProof(){ document.getElementById('proofModal').classList.add('hidden'); }
 function toast(m){ const t=document.getElementById('toast'); t.innerText=m; t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'),3500); }
-function onFile(inp){ state.file=inp.files[0]; document.getElementById('dropLabel').innerText = state.file? `✓ ${state.file.name}` : 'Click to upload'; }
 
-// LOGIN LOGIC - MULTI-TENANT CHECK
+function onFile(inp){
+  state.file = inp.files[0];
+  if(!state.file) return;
+  document.getElementById('dropLabel').innerText = `⏳ Reading ${state.file.name}...`;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    state.fileData = e.target.result;
+    state.fileType = state.file.type;
+    document.getElementById('dropLabel').innerText = `✓ ${state.file.name} (${(state.file.size/1024).toFixed(1)}KB) - Ready`;
+  };
+  reader.readAsDataURL(state.file);
+}
+
 function doLogin(){
   const v = sel.value;
   const id = document.getElementById('loginId').value.trim().toUpperCase();
@@ -61,7 +70,6 @@ function doLogin(){
   toast(`🔓 Vault unlocked • ${v} isolated`);
 }
 
-// MENU
 function buildMenu(){
   const isAdmin = state.user.role==='admin';
   const pending = dbGet()[state.village].proofs.filter(p=>p.status==='Pending').length;
@@ -83,7 +91,6 @@ function navTab(k,el){
   }
 }
 
-// MEMBER
 function renderMemberHome(){
   const db = dbGet()[state.village]; const my = db.transactions.filter(t=>t.memberId===state.user.id);
   const verifiedTotal = my.filter(t=>t.status==='Verified').reduce((s,t)=>s+t.amount,0);
@@ -99,7 +106,6 @@ function renderMemberHome(){
   ${my.map(t=>`<tr><td>${t.date} ${t.time||''}</td><td>${t.type}</td><td>₦${t.amount.toLocaleString()}</td><td><span class="badge-s s-${t.status}">${t.status}</span></td><td>${t.updatedBy}</td></tr>`).join('')}</table></div>`;
 }
 
-// ADMIN
 function renderAdminHome(){
   const db=dbGet()[state.village]; const total=db.transactions.filter(t=>t.status==='Verified').reduce((s,t)=>s+t.amount,0);
   document.getElementById('mainPanel').innerHTML = `
@@ -113,18 +119,40 @@ function renderAdminHome(){
   <table><tr><th>Member</th><th>Levy</th><th>Amount</th><th>Status</th><th>Audit: Who Updated</th></tr>
   ${db.transactions.slice(0,7).map(t=>`<tr><td>${t.memberName}<div style="color:var(--muted);font-size:11px">${t.memberId}</div></td><td>${t.type}</td><td>₦${t.amount.toLocaleString()}</td><td><span class="badge-s s-${t.status}">${t.status}</span></td><td>${t.updatedBy} • ${t.date} ${t.time||''}</td></tr>`).join('')}</table></div>`;
 }
+
 function renderVerify(){
   const db=dbGet()[state.village];
-  document.getElementById('mainPanel').innerHTML = `<div class="card"><div class="card-h"><b>Proofs Awaiting Verification</b><span style="color:var(--muted);font-size:12px">Admin must verify before ledger updates</span></div>
-  <table><tr><th>Member</th><th>Levy Type</th><th>Amount</th><th>Proof File</th><th>Action</th></tr>
-  ${db.proofs.map(p=>`<tr><td>${p.memberName}<div style="color:var(--muted);font-size:11px">${p.memberId}</div></td><td>${p.type}</td><td>₦${p.amount.toLocaleString()}</td><td style="color:var(--lime)">${p.fileName}</td>
+  document.getElementById('mainPanel').innerHTML = `
+  <div class="card"><div class="card-h"><b>Proofs Awaiting Verification</b><span style="color:var(--muted);font-size:12px">Click View to see receipt before approving</span></div>
+  <table><tr><th>Member</th><th>Levy Type</th><th>Amount</th><th>Receipt</th><th>Action</th></tr>
+  ${db.proofs.map(p=>`<tr><td>${p.memberName}<div style="color:var(--muted);font-size:11px">${p.memberId}</div></td><td>${p.type}</td><td>₦${p.amount.toLocaleString()}</td>
+  <td><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px" onclick="viewProof('${p.id}')">👁 View ${p.fileName}</button></td>
   <td><button class="btn btn-lime" style="padding:6px 12px" onclick="verify('${p.id}',true)">✓ Verify</button> <button class="btn btn-ghost" style="padding:6px 12px" onclick="verify('${p.id}',false)">Reject</button></td></tr>`).join('') || `<tr><td colspan=5 style="text-align:center;padding:24px;color:var(--muted)">No pending proofs — all verified</td></tr>`}
   </table></div>`;
 }
+
+function viewProof(id){
+  const db=dbGet()[state.village];
+  const p=db.proofs.find(x=>x.id===id);
+  if(!p ||!p.fileData){ toast("❌ No file data found"); return; }
+  document.getElementById('viewProofMeta').innerText = `${p.memberName} (${p.memberId}) • ${p.type} • ₦${p.amount.toLocaleString()} • ${p.fileName}`;
+  const content = document.getElementById('viewProofContent');
+  if(p.fileType && p.fileType.includes('image')){
+    content.innerHTML = `<img src="${p.fileData}" style="max-width:100%;max-height:55vh;border-radius:8px" />`;
+  } else if(p.fileType && p.fileType.includes('pdf')){
+    content.innerHTML = `<iframe src="${p.fileData}" style="width:100%;height:55vh;border:0;border-radius:8px"></iframe><p style="margin-top:8px"><a href="${p.fileData}" download="${p.fileName}" style="color:var(--lime)">Download PDF</a></p>`;
+  } else {
+    content.innerHTML = `<a href="${p.fileData}" download="${p.fileName}" style="color:var(--lime);font-weight:700">📄 Download ${p.fileName}</a>`;
+  }
+  document.getElementById('viewVerifyBtn').onclick = ()=>{ document.getElementById('viewProofModal').classList.add('hidden'); verify(id,true); };
+  document.getElementById('viewRejectBtn').onclick = ()=>{ document.getElementById('viewProofModal').classList.add('hidden'); verify(id,false); };
+  document.getElementById('viewProofModal').classList.remove('hidden');
+}
+
 function renderMembers(){
   const db=dbGet()[state.village];
   document.getElementById('mainPanel').innerHTML = `<div class="card"><div class="card-h"><b>Members — Only Admin Can Generate Password</b><span style="font-size:11px;color:var(--muted)">Sent via WhatsApp / Email after verification</span></div>
-  <table><tr><th>ID</th><th>Name</th><th>Password (Hashed View)</th><th>Regenerate</th></tr>
+  <table><tr><th>ID</th><th>Name</th><th>Password</th><th>Regenerate</th></tr>
   ${db.members.map(m=>`<tr><td>${m.id}</td><td>${m.name}</td><td style="font-family:monospace">${m.pass}</td><td><button class="btn btn-ghost" style="padding:6px 10px" onclick="regen('${m.id}')">Regenerate & Send via WhatsApp</button></td></tr>`).join('')}</table></div>`;
 }
 function renderFullLedger(){
@@ -155,22 +183,38 @@ function renderAudit(){
   </table></div>`;
 }
 
-// ACTIONS
 function submitProof(){
-  const type=document.getElementById('pType').value; const amount=parseInt(document.getElementById('pAmount').value);
-  if(!amount ||!state.file){ toast("❌ Add amount + receipt"); return; }
-  const db=dbGet(); db[state.village].proofs.push({ id:Math.random().toString(36).slice(2,7), memberId:state.user.id, memberName:state.user.name, type, amount, fileName:state.file.name, status:'Pending', date:new Date().toISOString().split('T')[0] });
-  dbSave(db); closeProof(); state.file=null; document.getElementById('dropLabel').innerText='Click to upload JPG, PNG or PDF'; toast("✓ Proof sent to admin for verification"); renderMemberHome();
+  const type=document.getElementById('pType').value;
+  const amount=parseInt(document.getElementById('pAmount').value);
+  if(!amount){ toast("❌ Add amount"); return; }
+  if(!state.fileData){ toast("❌ Upload receipt first - wait for ✓ Ready"); return; }
+  const db=dbGet();
+  db[state.village].proofs.push({
+    id:Math.random().toString(36).slice(2,7),
+    memberId:state.user.id,
+    memberName:state.user.name,
+    type, amount,
+    fileName:state.file.name,
+    fileData:state.fileData,
+    fileType:state.fileType,
+    status:'Pending',
+    date:new Date().toISOString().split('T')[0]
+  });
+  dbSave(db); closeProof();
+  state.file=null; state.fileData=null;
+  document.getElementById('dropLabel').innerText='Click to upload JPG, PNG or PDF';
+  toast("✓ Proof submitted - Admin can now view it");
+  renderMemberHome();
 }
 function verify(id, ok){
   const db=dbGet(); const d=db[state.village]; const p=d.proofs.find(x=>x.id===id); if(!p) return;
   const now=new Date(); const stamp = now.toLocaleString();
   if(ok){
     d.transactions.push({ id:p.id, memberId:p.memberId, memberName:p.memberName, type:p.type, amount:p.amount, status:'Verified', date:p.date, time:now.toLocaleTimeString(), updatedBy:state.user.name });
-    d.audits.push({ time:stamp, admin:state.user.name, action:`VERIFIED ${p.type} ₦${p.amount.toLocaleString()}`, memberId:p.memberId });
+    d.audits.push({ time:stamp, admin:state.user.name, action:`VERIFIED ${p.type} ₦${p.amount.toLocaleString()} - Viewed ${p.fileName}`, memberId:p.memberId });
     toast(`✓ Verified ₦${p.amount.toLocaleString()} — stamped by ${state.user.name}`);
   } else {
-    d.audits.push({ time:stamp, admin:state.user.name, action:`REJECTED ${p.type} ₦${p.amount.toLocaleString()}`, memberId:p.memberId });
+    d.audits.push({ time:stamp, admin:state.user.name, action:`REJECTED ${p.type} ₦${p.amount.toLocaleString()} - Viewed ${p.fileName}`, memberId:p.memberId });
     toast("Rejected");
   }
   d.proofs = d.proofs.filter(x=>x.id!==id); dbSave(db); renderVerify(); buildMenu();
@@ -192,4 +236,4 @@ function downloadPDF(isAdmin){
   doc.text(`TOTAL VERIFIED: NGN ${tot.toLocaleString()} | Audit Trail Included | Admin Timestamp Verified`,14, doc.lastAutoTable.finalY+10);
   doc.save(`${state.village}_${isAdmin?'VILLAGE':'MEMBER'}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
   toast("PDF downloaded with audit stamps");
-  }
+                                  }
